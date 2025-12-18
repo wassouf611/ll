@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>خزنة أسراري</title>
-    <!-- مكتبة جوجل -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- تم تعديل استدعاء المكتبة هنا لضمان التحميل الصحيح -->
+    <script src="https://accounts.google.com/gsi/client" onload="initGoogleLib()" async defer></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -559,29 +561,37 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        updateMenuLabels();
-        updateGoogleUI();
-        localStorage.setItem('myFolders', JSON.stringify(folders));
-        
-        // Setup Google Identity Services
+    // هذه الدالة تعمل فقط عند انتهاء تحميل مكتبة جوجل
+    function initGoogleLib() {
+        console.log("Google JS loaded");
         if(window.google) {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: GOOGLE_CLIENT_ID,
                 scope: SCOPES,
                 callback: (tokenResponse) => {
                     if (tokenResponse && tokenResponse.access_token) {
+                        console.log("Got access token");
                         gAccessToken = tokenResponse.access_token;
                         localStorage.setItem('gAccessToken', gAccessToken);
                         isGoogleLoggedIn = true;
                         updateGoogleUI();
                         showToast("تم الربط بنجاح ✅");
-                        syncFromCloud(); // Auto sync on login
+                        syncFromCloud(); 
                     }
                 },
+                error_callback: (error) => {
+                    console.error("Google Auth Error:", error);
+                    showToast("حدث خطأ في المصادقة");
+                }
             });
         }
+    }
 
+    document.addEventListener('DOMContentLoaded', () => {
+        updateMenuLabels();
+        updateGoogleUI();
+        localStorage.setItem('myFolders', JSON.stringify(folders));
+        
         window.history.replaceState({page: 'home'}, null, '');
         window.onpopstate = function(event) {
             const modals = document.querySelectorAll('.overlay');
@@ -601,13 +611,13 @@
     });
 
     function handleGoogleAuth() {
-        const menu = document.getElementById('mainMenu');
-        menu.style.display = 'none'; // Close menu
-
         if(isGoogleLoggedIn) {
+             const menu = document.getElementById('mainMenu');
+             menu.style.display = 'none'; // Close menu only for logout
+             
             // Logout
             customConfirm("هل تريد تسجيل الخروج من جوجل؟", () => {
-                if (gAccessToken) {
+                if (gAccessToken && window.google) {
                     google.accounts.oauth2.revoke(gAccessToken, () => {console.log('Token revoked')});
                 }
                 localStorage.removeItem('gAccessToken');
@@ -619,9 +629,19 @@
         } else {
             // Login
             if(tokenClient) {
+                // نطلب التوكن أولاً قبل إغلاق القائمة لتفادي حظر الـ Popup
                 tokenClient.requestAccessToken();
+                
+                // إغلاق القائمة بعد لحظة بسيطة
+                setTimeout(() => {
+                    document.getElementById('mainMenu').style.display = 'none';
+                }, 100);
             } else {
-                showToast("حدث خطأ في تحميل خدمات جوجل");
+                console.error("Token client not initialized yet");
+                showToast("جاري تحميل خدمات جوجل... حاول مرة أخرى");
+                
+                // محاولة إعادة التهيئة إذا فشلت المرة الأولى
+                if(window.google && !tokenClient) initGoogleLib();
             }
         }
     }

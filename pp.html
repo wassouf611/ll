@@ -515,27 +515,20 @@
         }
     }
 
-    // --- SYNC ENGINE (ULTRA AGGRESSIVE ANTI-CACHE) ---
+    // --- SYNC ENGINE (FIXED) ---
+    // Fix: Using unique query parameter ONLY (safest way to bypass cache without breaking CORS)
     async function syncFromCloud(silent = false) {
         if(!gAccessToken) return;
         setSyncLoader(true);
-        if(!silent) showToast("جاري جلب أحدث نسخة...");
+        if(!silent) showToast("جاري التحديث...");
         
         try {
-            // FIX: Strongest possible headers to bypass browser cache
-            const noCacheHeaders = {
-                'Authorization': `Bearer ${gAccessToken}`,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            };
-
-            const unique = new Date().getTime(); // Unique number every time
+            const unique = new Date().getTime();
             const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`;
             
             // 1. Fetch File List
-            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&orderBy=modifiedTime desc&nocache=${unique}`, {
-                headers: noCacheHeaders
+            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&orderBy=modifiedTime desc&cb=${unique}`, {
+                headers: { 'Authorization': `Bearer ${gAccessToken}` }
             });
             
             if(searchResp.status === 401) { 
@@ -543,7 +536,7 @@
             }
             const data = await searchResp.json();
 
-            // *** Auto-Repair & Sync ***
+            // *** Auto-Repair Logic ***
             if (data.files && data.files.length > 0) {
                 
                 // Handle Duplicates
@@ -555,8 +548,8 @@
 
                     for (const f of data.files) {
                         try {
-                             const fResp = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&nocache=${unique}`, {
-                                headers: noCacheHeaders
+                             const fResp = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&cb=${unique}`, {
+                                headers: { 'Authorization': `Bearer ${gAccessToken}` }
                             });
                             const fData = await fResp.json();
                             if(fData.accounts) {
@@ -594,8 +587,8 @@
                 } else {
                     // Normal Sync
                     const fileId = data.files[0].id;
-                    const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&nocache=${unique}`, {
-                        headers: noCacheHeaders
+                    const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&cb=${unique}`, {
+                        headers: { 'Authorization': `Bearer ${gAccessToken}` }
                     });
                     
                     if (fileResp.ok) {
@@ -640,17 +633,11 @@
         if(!silent) showToast("جاري الرفع...");
         
         try {
-            const noCacheHeaders = {
-                'Authorization': `Bearer ${gAccessToken}`,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            };
             const unique = new Date().getTime();
             const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`;
             
-            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&orderBy=modifiedTime desc&nocache=${unique}`, {
-                headers: noCacheHeaders
+            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&orderBy=modifiedTime desc&cb=${unique}`, {
+                headers: { 'Authorization': `Bearer ${gAccessToken}` }
             });
             const data = await searchResp.json();
 
@@ -661,8 +648,8 @@
             if (data.files && data.files.length > 0) {
                 targetFileId = data.files[0].id;
                 
-                const cloudResp = await fetch(`https://www.googleapis.com/drive/v3/files/${targetFileId}?alt=media&nocache=${unique}`, {
-                    headers: noCacheHeaders
+                const cloudResp = await fetch(`https://www.googleapis.com/drive/v3/files/${targetFileId}?alt=media&cb=${unique}`, {
+                    headers: { 'Authorization': `Bearer ${gAccessToken}` }
                 });
                 if(cloudResp.ok) {
                     const cloudData = await cloudResp.json();

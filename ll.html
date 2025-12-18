@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول باستخدام جوجل</title>
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    <script>
+        var googleUser = {};
+        
+        function startApp() {
+            gapi.load('auth2', function() {
+                auth2 = gapi.auth2.init({
+                    client_id: '979816526016-ukb9vqtb6u2hlutombpf8rumbjr3o2ua.apps.googleusercontent.com', // معرف العميل
+                    cookiepolicy: 'single_host_origin',
+                    scope: 'profile'
+                });
+
+                attachSignin(document.getElementById('googleSignIn'));
+            });
+        }
+
+        function attachSignin(element) {
+            auth2.attachClickHandler(element, {}, function(googleUser) {
+                console.log("تم تسجيل الدخول بنجاح!");
+                console.log("ID المستخدم: " + googleUser.getBasicProfile().getId());
+                console.log("الاسم: " + googleUser.getBasicProfile().getName());
+                console.log("البريد الإلكتروني: " + googleUser.getBasicProfile().getEmail());
+            }, function(error) {
+                alert(JSON.stringify(error, undefined, 2));
+            });
+        }
+    </script>
+</head>
+<body onload="startApp();">
+    <h2>تسجيل الدخول باستخدام جوجل</h2>
+    <button id="googleSignIn">تسجيل الدخول باستخدام جوجل</button>
+</body>
+</html>

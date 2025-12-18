@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>خزنة أسراري</title>
     
-    <!-- مكتبة جوجل -->
     <script src="https://accounts.google.com/gsi/client" onload="initGoogleLib()" async defer></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -18,292 +16,66 @@
             --text: #374151;
             --gray-border: #e5e7eb;
             --danger: #ef4444;
-            --success: #10b981;
             --header-height: 70px;
         }
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); height: 100vh; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); overflow-x: hidden;}
 
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 0;
-            color: var(--text);
-            height: 100vh;
-            height: -webkit-fill-available;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        header {
-            height: var(--header-height);
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 45px 1fr 45px;
-            align-items: center;
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 20px;
-            color: var(--primary-dark);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .menu-btn {
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            cursor: pointer;
-            background: #f3f4f6;
-            color: #4b5563;
-            transition: 0.2s;
-        }
-        .menu-btn:active { background: #e5e7eb; }
-
-        .main-menu {
-            position: absolute;
-            top: calc(var(--header-height) + 5px);
-            left: 20px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 260px;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 1000;
-            border: 1px solid #f3f4f6;
-        }
+        header { height: var(--header-height); padding: 0 20px; display: grid; grid-template-columns: 45px 1fr 45px; align-items: center; position: relative; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 20px; color: var(--primary-dark); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
         
-        .menu-item {
-            padding: 16px 20px;
-            cursor: pointer;
-            border-bottom: 1px solid #f3f4f6;
-            font-size: 15px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #4b5563;
-        }
-        
+        .menu-btn { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; background: #f3f4f6; color: #4b5563; }
+        .main-menu { position: absolute; top: calc(var(--header-height) + 5px); left: 20px; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 260px; display: none; flex-direction: column; overflow: hidden; z-index: 1000; border: 1px solid #f3f4f6; }
+        .menu-item { padding: 16px 20px; cursor: pointer; border-bottom: 1px solid #f3f4f6; font-size: 15px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; color: #4b5563; }
         .menu-item:last-child { border-bottom: none; }
-        .menu-item:active { background: #f9fafb; }
         .menu-icon { width: 20px; height: 20px; opacity: 0.6; }
+        
+        /* ألوان العناصر في القائمة */
+        .sync-item { color: var(--primary); background: #f5f3ff; }
+        .sync-item .menu-icon { opacity: 1; color: var(--primary); }
         .delete-item { color: var(--danger); }
         .delete-item .menu-icon { opacity: 1; color: var(--danger); stroke: var(--danger); }
-        
-        /* تنسيق عناصر المزامنة */
-        .sync-item { color: var(--primary); }
-        .sync-item .menu-icon { opacity: 1; color: var(--primary); }
-        .clean-item { color: #d97706; } /* لون برتقالي للتنظيف */
-        .clean-item .menu-icon { opacity: 1; color: #d97706; }
 
-        .container {
-            padding: 0 25px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 500px;
-            margin: 0 auto;
-            width: 100%;
-        }
+        .container { padding: 0 25px; flex: 1; display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: 0 auto; width: 100%; }
+        input { width: 100%; padding: 18px; border: 1px solid var(--gray-border); border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 16px; outline: none; background: var(--surface); color: var(--text); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1); }
 
-        input {
-            width: 100%;
-            padding: 18px;
-            border: 1px solid var(--gray-border);
-            border-radius: 12px;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 16px;
-            outline: none;
-            background: var(--surface);
-            color: var(--text);
-            transition: 0.3s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        
-        input::placeholder { color: #9ca3af; }
-        input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.4); }
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); margin-top: 5px; }
 
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.4);
-        }
-        .btn-primary:active { transform: scale(0.98); }
-
-        .btn-outline {
-            background: white;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            box-shadow: none;
-            margin-top: 5px;
-        }
-        .btn-outline:active { background: #f5f3ff; transform: scale(0.98); }
-
-        #vaultPage {
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #f9fafb; z-index: 200; 
-            display: none; 
-            flex-direction: column; 
-            overflow: hidden;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .vault-fixed-top {
-            padding: 10px 20px 5px 20px;
-            background: #f9fafb;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 10;
-        }
-
-        #vaultList {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 20px 100px 20px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .vault-header { 
-            display: flex; align-items: center; justify-content: space-between; 
-            margin-bottom: 5px; height: 45px;
-        }
-        .vault-title { color:#1f2937; margin:0; font-size: 20px; font-weight: 700; }
-        
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-
-        .icon-btn { 
-            background: white; border: 1px solid #e5e7eb; 
-            width: 40px; height: 40px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; cursor: pointer; color: var(--text);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+        #vaultPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f9fafb; z-index: 200; display: none; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+        .vault-fixed-top { padding: 10px 20px 5px 20px; background: #f9fafb; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; z-index: 10; }
+        #vaultList { flex: 1; overflow-y: auto; padding: 10px 20px 100px 20px; }
+        .vault-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; height: 45px; }
+        .icon-btn { background: white; border: 1px solid #e5e7eb; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; color: var(--text); }
         .icon-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .folders-bar { display: flex; gap: 10px; overflow-x: auto; padding: 5px 2px 10px 2px; scrollbar-width: none; flex-shrink: 0; }
+        .folder-chip { background: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #6b7280; border: 1px solid #e5e7eb; white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .folder-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .add-folder-btn { background: #f3f4f6; color: var(--primary); font-weight: bold; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px dashed var(--primary); cursor: pointer; }
 
-        .folders-bar {
-            display: flex; gap: 10px; overflow-x: auto; padding: 5px 2px 10px 2px;
-            scrollbar-width: none; -ms-overflow-style: none; flex-shrink: 0;
-        }
-        .folders-bar::-webkit-scrollbar { display: none; }
-        
-        .folder-chip {
-            background: white; padding: 8px 16px; border-radius: 20px;
-            font-size: 14px; color: #6b7280; border: 1px solid #e5e7eb;
-            white-space: nowrap; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; gap: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .folder-chip.active {
-            background: var(--primary); color: white; border-color: var(--primary);
-            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
-        }
-        .add-folder-btn {
-            background: #f3f4f6; color: var(--primary); font-weight: bold; width: 35px; height: 35px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            border: 1px dashed var(--primary); cursor: pointer;
-        }
-
-        .account-card {
-            background: white; padding: 15px; border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
-            margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
-            position: relative; overflow: hidden; transition: 0.2s;
-        }
-        .account-card::after {
-            content: ''; position: absolute; right: 0; top: 15%; bottom: 15%;
-            width: 4px; background: var(--primary); border-radius: 4px 0 0 4px;
-        }
-        .account-card.selected-card {
-            background: #f5f3ff; border: 1px solid var(--primary);
-        }
-        .account-card.dragging { opacity: 0.5; background: #fafafa; border: 2px dashed #ccc; transform: scale(0.98); }
-        
-        .selection-check {
-            width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d1d5db;
-            display: none; align-items: center; justify-content: center; color: white;
-            flex-shrink: 0; transition: 0.2s;
-        }
-        .selected-card .selection-check { display: flex; background: var(--primary); border-color: var(--primary); }
-        
+        .account-card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; position: relative; overflow: hidden; }
+        .account-card::after { content: ''; position: absolute; right: 0; top: 15%; bottom: 15%; width: 4px; background: var(--primary); border-radius: 4px 0 0 4px; }
+        .account-card.selected-card { background: #f5f3ff; border: 1px solid var(--primary); }
         .card-main { flex: 1; display: flex; flex-direction: column; gap: 8px; padding-right: 10px;}
         .card-email { font-weight: 700; color: #1f2937; font-size: 15px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; word-break: break-all;}
-        .card-pass-pill {
-            background: #f3f4f6; padding: 8px; border-radius: 50px; text-align: center;
-            font-family: monospace; color: #374151; cursor: pointer; letter-spacing: 2px; font-size: 20px;
-        }
+        .card-pass-pill { background: #f3f4f6; padding: 8px; border-radius: 50px; text-align: center; font-family: monospace; color: #374151; cursor: pointer; letter-spacing: 2px; font-size: 20px; }
         .hidden-pass { color: #9ca3af; letter-spacing: 4px; font-size: 24px; line-height: 0.8;}
+        
+        .selection-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d1d5db; display: none; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+        .selected-card .selection-check { display: flex; background: var(--primary); border-color: var(--primary); }
+        .drag-handle { color: #d1d5db; padding: 5px; cursor: grab; }
 
-        .bottom-action-bar {
-            position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); 
-            left: 50%; transform: translateX(-50%) translateY(150px);
-            background: #1f2937; color: white; padding: 10px 20px; border-radius: 30px;
-            display: flex; gap: 15px; align-items: center; z-index: 300; transition: 0.3s;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+        .bottom-action-bar { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(150px); background: #1f2937; color: white; padding: 10px 20px; border-radius: 30px; display: flex; gap: 15px; align-items: center; z-index: 300; transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .bottom-action-bar.visible { transform: translateX(-50%) translateY(0); }
         .action-btn-small { background: none; border: none; color: white; font-weight: bold; cursor: pointer; font-family: 'Tajawal'; font-size: 14px; display: flex; align-items: center; gap: 5px; }
 
-        .overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
-            z-index: 900; display: none; justify-content: center; align-items: center;
-            padding: 20px;
-        }
-
-        .modal {
-            background: white; width: 100%; max-width: 320px;
-            border-radius: 24px; padding: 25px; text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 900; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal { background: white; width: 100%; max-width: 320px; border-radius: 24px; padding: 25px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
         .modal h3 { margin-top: 0; color: var(--primary); }
         .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .btn-small { padding: 12px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; flex: 1; }
@@ -312,75 +84,48 @@
 
         .folder-list-modal { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; text-align: right; margin-top: 15px; }
         .folder-item-row { padding: 12px; background: #f9fafb; border-radius: 10px; cursor: pointer; font-weight: 500; border: 1px solid transparent; transition: 0.2s; }
-        .folder-item-row:active { background: #e5e7eb; }
-        .folder-item-row.selected-f { border-color: var(--primary); background: #f5f3ff; color: var(--primary); }
-
-        .modal-clean { background: white; width: 100%; max-width: 320px; border-radius: 24px; padding: 0; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+        
+        .modal-clean { background: white; width: 100%; max-width: 320px; border-radius: 24px; padding: 0; overflow: hidden; }
         .modal-header-clean { text-align: center; padding: 20px 0 10px 0; color: var(--primary); font-weight: 700; font-size: 18px; }
         .action-item { display: flex; align-items: center; justify-content: space-between; padding: 18px 25px; border-bottom: 1px solid #f3f4f6; cursor: pointer; color: #374151; font-weight: 500; }
         .action-item:last-child { border-bottom: none; color: var(--danger); }
-        .action-item svg { width: 20px; height: 20px; }
 
-        .toast {
-            position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
-            background: #1f2937; color: white; padding: 12px 25px; border-radius: 30px;
-            font-size: 14px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 1000;
-            width: max-content; max-width: 90%; text-align: center;
-        }
-        
+        .toast { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 12px 25px; border-radius: 30px; font-size: 14px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 1000; width: max-content; max-width: 90%; text-align: center; }
         .backup-area { width: 100%; height: 100px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; resize: none; background: #f9fafb; outline: none;}
-        .drag-handle { color: #d1d5db; padding: 5px; cursor: grab; }
 
+        /* حالة المزامنة */
+        #syncStatus { font-size: 12px; color: #6b7280; text-align: center; margin-bottom: 10px; display: none;}
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<!-- Header (Grid) -->
 <header>
     <div class="menu-btn" onclick="safeToggleMenu(event)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
     </div>
-    
     <h1>خزنة أسراري 🔐</h1>
-    
     <div style="width: 45px;"></div>
     
     <div id="mainMenu" class="main-menu" onclick="event.stopPropagation()">
-        
-        <!-- زر جوجل -->
         <div class="menu-item" id="googleBtn" onclick="handleGoogleAuth()">
             <span id="googleBtnText">ربط حساب جوجل</span>
-            <svg id="googleBtnIcon" class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="opacity: 1; color: #4285F4;">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
-            </svg>
+            <svg id="googleBtnIcon" class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path></svg>
         </div>
-
-        <!-- زر مزامنة يدوي -->
-        <div class="menu-item sync-item" id="manualSyncBtn" onclick="manualSync()">
+        <div class="menu-item sync-item" id="manualSyncBtn" onclick="manualSync()" style="display:none">
             <span>مزامنة سحابية يدوية</span>
             <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         </div>
-
-        <!-- زر تنظيف السحابة (الحل للمشكلة) -->
-        <div class="menu-item clean-item" id="cleanCloudBtn" onclick="cleanCloudStorage()">
-            <span>⚠️ تنظيف السحابة (إصلاح)</span>
-            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-        </div>
-
         <div class="menu-item" id="menuSetPass" onclick="handleAppLockSettings()">
             <span>تعيين كلمة مرور للتطبيق</span>
             <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
         <div class="menu-item" onclick="showBackupModal()">
             <span>نسخ احتياطي</span>
-            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path></svg>
         </div>
         <div class="menu-item" onclick="showImportModal()">
             <span>استيراد بيانات</span>
-            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
         </div>
         <div class="menu-item delete-item" onclick="confirmDeleteAll()">
             <span>حذف جميع البيانات</span>
@@ -390,27 +135,22 @@
 </header>
 
 <div class="container">
-    <div style="margin-top: 10px;"></div>
-    
+    <div id="syncStatus"></div>
     <input type="text" id="emailInput" placeholder="البريد الإلكتروني / العنوان" autocomplete="off">
     <input type="text" id="passInput" placeholder="كلمة المرور" autocomplete="off">
     
     <button class="btn btn-primary" onclick="prepareSaveAccount()">
         <span>حفظ في الخزنة</span> 
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path></svg>
     </button>
 
-    <button id="vaultBtn" class="btn btn-outline" 
-            onclick="openVaultCheck()" 
-            onmousedown="startVaultPress()" ontouchstart="startVaultPress()" 
-            onmouseup="cancelVaultPress()" ontouchend="cancelVaultPress()">
+    <button id="vaultBtn" class="btn btn-outline" onclick="openVaultCheck()" onmousedown="startVaultPress()" ontouchstart="startVaultPress()" onmouseup="cancelVaultPress()" ontouchend="cancelVaultPress()">
         <span>فتح المحفوظات</span> 
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
     </button>
     <div style="text-align: center; font-size: 11px; color: #9ca3af; margin-top: 8px;">(اضغط مطولاً لقفل/إلغاء قفل الزر)</div>
 </div>
 
-<!-- Vault Page (Fixed Layout) -->
 <div id="vaultPage">
     <div class="vault-fixed-top">
         <div class="vault-header">
@@ -424,974 +164,389 @@
                 </button>
             </div>
         </div>
-
         <div style="position: relative; margin-bottom: 5px;">
             <svg style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #9ca3af;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="searchInput" style="width: 100%; padding: 15px 45px 15px 15px; border-radius: 15px; border: 1px solid #e5e7eb; background: white; margin:0" placeholder="بحث سريع..." oninput="renderVault()">
         </div>
-
-        <div class="folders-bar" id="foldersBar">
-            <div class="add-folder-btn" onclick="openAddFolderModal()">+</div>
-        </div>
+        <div class="folders-bar" id="foldersBar"><div class="add-folder-btn" onclick="openAddFolderModal()">+</div></div>
     </div>
-
     <div id="vaultList"></div>
-    
-    <div id="bottomBar" class="bottom-action-bar">
-        <span id="selectedCount">0 محدد</span>
-        <button class="action-btn-small" onclick="openMoveModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-            نقل إلى...
-        </button>
-    </div>
+    <div id="bottomBar" class="bottom-action-bar"><span id="selectedCount">0 محدد</span><button class="action-btn-small" onclick="openMoveModal()">نقل إلى...</button></div>
 </div>
 
-<!-- Context Menu -->
 <div id="contextModal" class="overlay" onclick="goBack()">
     <div class="modal-clean" onclick="event.stopPropagation()">
-        <div class="modal-header-clean" id="ctxTitle">خيارات الإيميل</div>
+        <div class="modal-header-clean" id="ctxTitle">خيارات</div>
         <div class="action-list">
-            <div class="action-item" onclick="ctxAction('copy')">
-                <span>نسخ</span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </div>
-            <div class="action-item" onclick="ctxAction('edit')">
-                <span>تعديل</span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            </div>
-            <div class="action-item" onclick="ctxAction('delete')">
-                <span>حذف</span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </div>
+            <div class="action-item" onclick="ctxAction('copy')"><span>نسخ</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+            <div class="action-item" onclick="ctxAction('edit')"><span>تعديل</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg></div>
+            <div class="action-item" onclick="ctxAction('delete')"><span>حذف</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
         </div>
     </div>
 </div>
 
-<!-- Modals -->
 <div id="confirmModal" class="overlay">
-    <div class="modal">
-        <h3 id="confirmTitle">تنبيه</h3>
-        <p id="confirmMessage" style="color:#6b7280; margin-bottom:20px">هل أنت متأكد؟</p>
-        <div class="modal-actions">
-            <button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button>
-            <button class="btn-small btn-confirm" id="confirmYesBtn">نعم</button>
-        </div>
-    </div>
+    <div class="modal"><h3 id="confirmTitle">تنبيه</h3><p id="confirmMessage" style="color:#6b7280; margin-bottom:20px">هل أنت متأكد؟</p><div class="modal-actions"><button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button><button class="btn-small btn-confirm" id="confirmYesBtn">نعم</button></div></div>
 </div>
 
 <div id="passwordModal" class="overlay">
-    <div class="modal">
-        <h3 id="passModalTitle">أدخل كلمة المرور</h3>
-        <input type="password" id="globalPassInput" style="text-align:center; font-size:24px; letter-spacing:5px; width:100%; border:1px solid #ddd; padding:10px; border-radius:10px;" placeholder="••••">
-        <div class="modal-actions">
-            <button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button>
-            <button class="btn-small btn-confirm" onclick="submitPassword()">تأكيد</button>
-        </div>
-    </div>
+    <div class="modal"><h3 id="passModalTitle">أدخل كلمة المرور</h3><input type="password" id="globalPassInput" style="text-align:center; font-size:24px; letter-spacing:5px; width:100%; border:1px solid #ddd; padding:10px; border-radius:10px;" placeholder="••••"><div class="modal-actions"><button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button><button class="btn-small btn-confirm" onclick="submitPassword()">تأكيد</button></div></div>
 </div>
 
-<!-- Folder Selection Modal -->
-<div id="folderSelectModal" class="overlay" onclick="goBack()">
-    <div class="modal" onclick="event.stopPropagation()">
-        <h3 id="folderModalTitle">اختر المجلد</h3>
-        <div class="folder-list-modal" id="folderListModalBody"></div>
-        <div class="modal-actions">
-            <button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button>
-        </div>
-    </div>
-</div>
+<div id="folderSelectModal" class="overlay" onclick="goBack()"><div class="modal" onclick="event.stopPropagation()"><h3 id="folderModalTitle">اختر المجلد</h3><div class="folder-list-modal" id="folderListModalBody"></div><div class="modal-actions"><button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button></div></div></div>
 
-<!-- Add/Rename Folder Modal -->
-<div id="addFolderModal" class="overlay">
-    <div class="modal">
-        <h3 id="addFolderTitle">مجلد جديد</h3>
-        <input type="text" id="folderNameInput" placeholder="اسم المجلد (مثلاً: فيسبوك)">
-        <div class="modal-actions">
-            <button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button>
-            <button class="btn-small btn-confirm" onclick="submitFolder()">حفظ</button>
-        </div>
-    </div>
-</div>
+<div id="addFolderModal" class="overlay"><div class="modal"><h3 id="addFolderTitle">مجلد جديد</h3><input type="text" id="folderNameInput" placeholder="اسم المجلد"><div class="modal-actions"><button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button><button class="btn-small btn-confirm" onclick="submitFolder()">حفظ</button></div></div></div>
 
-<div id="backupModal" class="overlay" onclick="goBack()">
-    <div class="modal" onclick="event.stopPropagation()">
-        <h3>نسخ احتياطي</h3>
-        <textarea id="backupText" class="backup-area" readonly></textarea>
-        <div class="modal-actions">
-            <button class="btn-small btn-confirm" onclick="copyBackup()">نسخ الكود</button>
-            <button class="btn-small btn-cancel" onclick="goBack()">إغلاق</button>
-        </div>
-    </div>
-</div>
+<div id="backupModal" class="overlay" onclick="goBack()"><div class="modal" onclick="event.stopPropagation()"><h3>نسخ احتياطي</h3><textarea id="backupText" class="backup-area" readonly></textarea><div class="modal-actions"><button class="btn-small btn-confirm" onclick="copyBackup()">نسخ الكود</button><button class="btn-small btn-cancel" onclick="goBack()">إغلاق</button></div></div></div>
 
-<div id="importModal" class="overlay" onclick="goBack()">
-    <div class="modal" onclick="event.stopPropagation()">
-        <h3>استيراد بيانات</h3>
-        <textarea id="importText" class="backup-area" placeholder="اضغط هنا مطولاً ثم اختر لصق..."></textarea>
-        <div class="modal-actions" style="flex-direction: column; gap:10px">
-            <button class="btn-small btn-cancel" onclick="pasteFromClipboard()" style="width:100%; border:1px solid var(--primary); background:white; color:var(--primary)">📋 محاولة لصق تلقائي</button>
-            <div style="display:flex; gap:10px; width:100%">
-                <button class="btn-small btn-confirm" onclick="performImport()">استعادة</button>
-                <button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button>
-            </div>
-        </div>
-    </div>
-</div>
+<div id="importModal" class="overlay" onclick="goBack()"><div class="modal" onclick="event.stopPropagation()"><h3>استيراد بيانات</h3><textarea id="importText" class="backup-area" placeholder="اضغط هنا مطولاً ثم اختر لصق..."></textarea><div class="modal-actions" style="flex-direction: column; gap:10px"><button class="btn-small btn-cancel" onclick="pasteFromClipboard()" style="width:100%; border:1px solid var(--primary);">📋 لصق تلقائي</button><div style="display:flex; gap:10px; width:100%"><button class="btn-small btn-confirm" onclick="performImport()">استعادة</button><button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button></div></div></div></div>
 
-<div id="toast" class="toast">تمت العملية بنجاح</div>
+<div id="toast" class="toast"></div>
 
 <script>
     let accounts = JSON.parse(localStorage.getItem('myPasswords') || '[]');
     let folders = JSON.parse(localStorage.getItem('myFolders') || '["عام", "فيسبوك", "جوجل"]');
-    
-    // Ensure all accounts have a folder
     accounts.forEach(acc => { if(!acc.folder) acc.folder = 'عام'; });
 
-    let longPressTimer, isLongPress = false;
-    let currentCtxId = null, currentCtxType = null;
-    let pendingCallback = null;
-    
-    let activeFolder = 'All'; 
-    let isSelectionMode = false;
-    let selectedIds = new Set();
-    let isMoveAction = false; 
-    let folderRenameTarget = null;
-
-    /* --- Google Auth & Sync Logic --- */
+    /* --- Google Logic (FIXED) --- */
     const GOOGLE_CLIENT_ID = '979816526016-ukb9vqtb6u2hlutombpf8rumbjr3o2ua.apps.googleusercontent.com';
     const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
     const FILENAME = 'secret_vault_data.json';
-    let tokenClient;
-    let gAccessToken = localStorage.getItem('gAccessToken');
-    let isGoogleLoggedIn = !!gAccessToken;
-
-    function updateGoogleUI() {
-        const btnText = document.getElementById('googleBtnText');
-        const btnIcon = document.getElementById('googleBtnIcon');
-        const syncBtn = document.getElementById('manualSyncBtn');
-        const cleanBtn = document.getElementById('cleanCloudBtn');
-        
-        if(isGoogleLoggedIn) {
-            btnText.innerText = "تسجيل خروج";
-            btnText.style.color = "var(--danger)";
-            btnIcon.style.color = "var(--danger)";
-            btnIcon.innerHTML = `<path fill="currentColor" d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>`;
-            syncBtn.style.display = 'flex'; 
-            cleanBtn.style.display = 'flex'; // اظهار زر التنظيف
-        } else {
-            btnText.innerText = "ربط حساب جوجل";
-            btnText.style.color = "#4b5563";
-            btnIcon.innerHTML = `<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>`;
-            syncBtn.style.display = 'none'; 
-            cleanBtn.style.display = 'none';
-        }
-    }
+    let tokenClient, gAccessToken = localStorage.getItem('gAccessToken'), isGoogleLoggedIn = !!gAccessToken;
 
     function initGoogleLib() {
-        console.log("Google JS loaded");
         if(window.google) {
             tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: GOOGLE_CLIENT_ID,
-                scope: SCOPES,
-                callback: (tokenResponse) => {
-                    if (tokenResponse && tokenResponse.access_token) {
-                        gAccessToken = tokenResponse.access_token;
+                client_id: GOOGLE_CLIENT_ID, scope: SCOPES,
+                callback: (resp) => {
+                    if (resp.access_token) {
+                        gAccessToken = resp.access_token;
                         localStorage.setItem('gAccessToken', gAccessToken);
                         isGoogleLoggedIn = true;
                         updateGoogleUI();
-                        showToast("تم الربط بنجاح ✅");
-                        // عند تسجيل الدخول لاول مرة، نحاول جلب البيانات
+                        showToast("تم الربط ✅");
                         syncFromCloud();
                     }
-                },
-                error_callback: (error) => {
-                    console.error("Google Auth Error:", error);
-                    showToast("حدث خطأ في المصادقة");
                 }
             });
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        updateMenuLabels();
-        updateGoogleUI();
-        localStorage.setItem('myFolders', JSON.stringify(folders));
+    function updateGoogleUI() {
+        const btnText = document.getElementById('googleBtnText');
+        const syncBtn = document.getElementById('manualSyncBtn');
+        const status = document.getElementById('syncStatus');
         
-        window.history.replaceState({page: 'home'}, null, '');
-        window.onpopstate = function(event) {
-            const modals = document.querySelectorAll('.overlay');
-            let closedSomething = false;
-            modals.forEach(modal => {
-                if(modal.style.display === 'flex') { modal.style.display = 'none'; closedSomething = true; }
-            });
-            const menu = document.getElementById('mainMenu');
-            if(menu.style.display === 'flex') { menu.style.display = 'none'; closedSomething = true; }
-            const vault = document.getElementById('vaultPage');
-            if(!closedSomething && vault.style.display === 'flex') { 
-                vault.style.display = 'none'; 
-                if(isSelectionMode) toggleSelectionMode();
-                closedSomething = true; 
-            }
-        };
-    });
+        if(isGoogleLoggedIn) {
+            btnText.innerText = "تسجيل خروج"; btnText.style.color = "var(--danger)";
+            syncBtn.style.display = 'flex';
+            status.style.display = 'block';
+            status.innerText = "متصل بحساب جوجل";
+        } else {
+            btnText.innerText = "ربط حساب جوجل"; btnText.style.color = "#4b5563";
+            syncBtn.style.display = 'none';
+            status.style.display = 'none';
+        }
+    }
 
     function handleGoogleAuth() {
         if(isGoogleLoggedIn) {
-             const menu = document.getElementById('mainMenu');
-             menu.style.display = 'none'; 
-             
-            customConfirm("هل تريد تسجيل الخروج من جوجل؟", () => {
-                if (gAccessToken && window.google) {
-                    google.accounts.oauth2.revoke(gAccessToken, () => {console.log('Token revoked')});
-                }
-                localStorage.removeItem('gAccessToken');
-                gAccessToken = null;
-                isGoogleLoggedIn = false;
-                updateGoogleUI();
-                showToast("تم تسجيل الخروج");
+             document.getElementById('mainMenu').style.display = 'none';
+             customConfirm("تسجيل الخروج؟", () => {
+                if(gAccessToken) google.accounts.oauth2.revoke(gAccessToken, ()=>{});
+                localStorage.removeItem('gAccessToken'); isGoogleLoggedIn = false;
+                updateGoogleUI(); showToast("تم الخروج");
             });
-        } else {
-            if(tokenClient) {
-                tokenClient.requestAccessToken();
-                setTimeout(() => { document.getElementById('mainMenu').style.display = 'none'; }, 100);
-            } else {
-                if(window.google && !tokenClient) initGoogleLib();
-                else showToast("جاري تحميل الخدمات... حاول لاحقاً");
-            }
+        } else if(tokenClient) {
+            tokenClient.requestAccessToken();
+            setTimeout(() => document.getElementById('mainMenu').style.display = 'none', 100);
         }
     }
 
-    // --- وظيفة تنظيف السحابة (لحل المشكلة) ---
-    async function cleanCloudStorage() {
-        document.getElementById('mainMenu').style.display = 'none';
-        if (!isGoogleLoggedIn) { showToast("يجب ربط الحساب أولاً"); return; }
-        
-        customConfirm("سيتم حذف ملفات السحابة لإعادة المزامنة. هل أنت موافق؟", async () => {
-            showToast("جاري تنظيف السحابة... 🧹");
-            try {
-                // البحث عن جميع الملفات
-                const searchResponse = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and 'appDataFolder' in parents&spaces=appDataFolder`, {
-                    headers: { 'Authorization': `Bearer ${gAccessToken}` }
-                });
-                const searchData = await searchResponse.json();
-                
-                if (searchData.files && searchData.files.length > 0) {
-                    // حذف كل ملف وجدناه
-                    for(const file of searchData.files) {
-                         await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${gAccessToken}` }
-                        });
-                    }
-                    showToast("تم حذف الملفات التالفة/المكررة ✅");
-                    setTimeout(() => showToast("الآن اضغط مزامنة يدوية لرفع بياناتك"), 2000);
-                } else {
-                    showToast("السحابة نظيفة بالفعل 👍");
-                }
-            } catch(error) {
-                console.error("Clean error:", error);
-                showToast("حدث خطأ أثناء التنظيف ❌");
-            }
-        });
-    }
-
-    // --- وظيفة المزامنة اليدوية ---
     function manualSync() {
         document.getElementById('mainMenu').style.display = 'none';
-        if (!isGoogleLoggedIn) { showToast("يجب ربط الحساب أولاً"); return; }
-        
-        // استراتيجية المزامنة اليدوية:
-        // 1. نحاول التنزيل أولاً (لمنع الكتابة فوق بيانات موجودة إذا كان جهازي فارغاً)
-        // 2. إذا لم نجد ملفات، نقوم بالرفع (لأن هذا يعني أننا أول جهاز يستخدم التطبيق)
-        showToast("جاري الاتصال بالسحابة... ☁️");
-        syncFromCloud(true); 
+        if(!isGoogleLoggedIn) return showToast("غير متصل بجوجل");
+        showToast("جاري البحث في السحابة... ☁️");
+        syncFromCloud(true);
+    }
+
+    // المنطق الجديد: البحث عن كل الملفات وتحديد "الأفضل"
+    async function syncFromCloud(isManual = false) {
+        if (!isGoogleLoggedIn) return;
+        try {
+            // 1. البحث عن كافة الملفات بهذا الاسم
+            const q = `name='${FILENAME}' and 'appDataFolder' in parents and trashed=false`;
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,size,modifiedTime)&spaces=appDataFolder`, {
+                headers: { 'Authorization': `Bearer ${gAccessToken}` }
+            });
+            const data = await res.json();
+            
+            if (data.files && data.files.length > 0) {
+                // 2. ترتيب الملفات حسب الحجم (الأكبر أولاً) لأنه يحتوي على بيانات أكثر
+                // إذا تساوى الحجم، نأخذ الأحدث وقتاً
+                data.files.sort((a, b) => {
+                    const sizeA = parseInt(a.size || 0);
+                    const sizeB = parseInt(b.size || 0);
+                    if (sizeB !== sizeA) return sizeB - sizeA; // الأكبر أولاً
+                    return new Date(b.modifiedTime) - new Date(a.modifiedTime); // الأحدث أولاً
+                });
+
+                const bestFile = data.files[0];
+                console.log("Using best file:", bestFile);
+
+                // تحميل الملف المختار
+                const contentRes = await fetch(`https://www.googleapis.com/drive/v3/files/${bestFile.id}?alt=media`, {
+                    headers: { 'Authorization': `Bearer ${gAccessToken}` }
+                });
+                const cloudData = await contentRes.json();
+                
+                if (cloudData && Array.isArray(cloudData.accounts)) {
+                    // دمج ذكي: إذا كان عندي بيانات وهو عنده بيانات، نأخذ اللي عددهم أكثر
+                    // أو إذا كان يدوي (استعادة)، نأخذ السحابة فوراً
+                    if (isManual || cloudData.accounts.length > accounts.length) {
+                        accounts = cloudData.accounts;
+                        folders = cloudData.folders || folders;
+                        localStorage.setItem('myPasswords', JSON.stringify(accounts));
+                        localStorage.setItem('myFolders', JSON.stringify(folders));
+                        renderVault(); renderFoldersBar();
+                        showToast(`تم استعادة ${accounts.length} ملاحظة ✅`);
+                    } else if (accounts.length > 0 && cloudData.accounts.length === 0) {
+                        // السحابة فارغة وانا عندي بيانات -> ارفع فوراً
+                         uploadToDrive(true);
+                    }
+                } else {
+                    // الملف تالف أو فارغ
+                    if(accounts.length > 0) uploadToDrive(true);
+                }
+
+                // تنظيف الملفات المكررة (اختياري، لعدم الإرباك مستقبلاً)
+                if(data.files.length > 1) {
+                    for(let i=1; i<data.files.length; i++) {
+                        fetch(`https://www.googleapis.com/drive/v3/files/${data.files[i].id}`, {
+                            method: 'DELETE', headers: { 'Authorization': `Bearer ${gAccessToken}` }
+                        });
+                    }
+                }
+
+            } else {
+                // لا يوجد ملفات -> رفع الموجود
+                if(accounts.length > 0) uploadToDrive(true);
+                else if(isManual) showToast("السحابة فارغة");
+            }
+        } catch (err) {
+            console.error(err);
+            if(err.status === 401) {
+                isGoogleLoggedIn = false; localStorage.removeItem('gAccessToken'); updateGoogleUI();
+                showToast("انتهت الجلسة");
+            } else if(isManual) showToast("فشل الاتصال");
+        }
     }
 
     async function uploadToDrive(isManual = false) {
-        if (!isGoogleLoggedIn || !gAccessToken) return;
-        if (isManual) showToast("جاري رفع بياناتك... ⬆️");
+        if (!isGoogleLoggedIn) return;
+        if(isManual) showToast("جاري الرفع... ⬆️");
         
-        const fileContent = JSON.stringify({ accounts, folders });
-        const file = new Blob([fileContent], { type: 'application/json' });
-        const metadata = {
-            name: FILENAME,
-            mimeType: 'application/json',
-            parents: ['appDataFolder']
-        };
+        const content = JSON.stringify({ accounts, folders });
+        const file = new Blob([content], { type: 'application/json' });
+        const metadata = { name: FILENAME, mimeType: 'application/json', parents: ['appDataFolder'] };
 
         try {
-            // 1. البحث عن الملف الموجود لتحديثه
-            const searchResponse = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and 'appDataFolder' in parents&spaces=appDataFolder`, {
+            // البحث للتحديث بدلاً من الإنشاء المتكرر
+            const q = `name='${FILENAME}' and 'appDataFolder' in parents and trashed=false`;
+            const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, {
                 headers: { 'Authorization': `Bearer ${gAccessToken}` }
             });
-            const searchData = await searchResponse.json();
+            const searchData = await searchRes.json();
             
-            let fileId = null;
-            if (searchData.files && searchData.files.length > 0) {
-                fileId = searchData.files[0].id; // نأخذ أول ملف نجده
-            }
-
-            // 2. الرفع أو التحديث
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             form.append('file', file);
 
-            let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-            let method = 'POST'; // افتراضياً إنشاء جديد
-
-            if (fileId) {
-                url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
-                method = 'PATCH'; // تحديث الموجود
-            }
-
-            await fetch(url, {
-                method: method,
-                headers: { 'Authorization': `Bearer ${gAccessToken}` },
-                body: form
-            });
-            
-            console.log("Synced to Cloud");
-            if (isManual) showToast("تم الحفظ في السحابة بنجاح ✅");
-            
-        } catch (error) {
-            console.error('Error syncing:', error);
-            if (isManual) showToast("فشل الرفع ❌");
-            if(error.status === 401) {
-                isGoogleLoggedIn = false;
-                localStorage.removeItem('gAccessToken');
-                updateGoogleUI();
-                showToast("انتهت الجلسة، سجل الدخول مجدداً");
-                if(tokenClient) tokenClient.requestAccessToken(); // محاولة تجديد التوكن
-            }
-        }
-    }
-
-    async function syncFromCloud(isManual = false) {
-        if (!isGoogleLoggedIn || !gAccessToken) return;
-        
-        try {
-            const searchResponse = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and 'appDataFolder' in parents&spaces=appDataFolder`, {
-                headers: { 'Authorization': `Bearer ${gAccessToken}` }
-            });
-            const searchData = await searchResponse.json();
-            
             if (searchData.files && searchData.files.length > 0) {
-                // وجدنا ملفات!
-                if (isManual) showToast("تم العثور على نسخة، جاري التنزيل... ⬇️");
+                // تحديث الملف الأول الموجود
                 const fileId = searchData.files[0].id;
-                
-                const fileResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                    headers: { 'Authorization': `Bearer ${gAccessToken}` }
+                await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`, {
+                    method: 'PATCH', headers: { 'Authorization': `Bearer ${gAccessToken}` }, body: form
                 });
-                const cloudData = await fileResponse.json();
-                
-                // التأكد من أن البيانات صالحة وليست فارغة
-                if (cloudData && (cloudData.accounts || cloudData.folders)) {
-                    accounts = cloudData.accounts || [];
-                    folders = cloudData.folders || ["عام"];
-                    
-                    localStorage.setItem('myPasswords', JSON.stringify(accounts));
-                    localStorage.setItem('myFolders', JSON.stringify(folders));
-                    
-                    // تحديث الواجهة فوراً
-                    renderVault();
-                    renderFoldersBar();
-                    
-                    if (isManual) showToast(`تم استعادة ${accounts.length} حساب ✅`);
-                } else {
-                    if (isManual) showToast("الملف السحابي فارغ! جاري الرفع...");
-                    uploadToDrive(true);
-                }
             } else {
-                // لا يوجد ملفات في السحابة
-                if (isManual) {
-                    showToast("لا توجد نسخة سحابية، جاري رفع البيانات المحلية...");
-                    uploadToDrive(true);
-                } else {
-                    // مزامنة تلقائية عند الدخول ولا يوجد ملف -> ارفع المحلي
-                    uploadToDrive();
-                }
+                // إنشاء جديد
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${gAccessToken}` }, body: form
+                });
             }
-        } catch (error) {
-            console.error('Error fetching:', error);
-            if(isManual) showToast("فشل الاتصال بالسحابة ❌");
-             if(error.status === 401) {
-                isGoogleLoggedIn = false;
-                localStorage.removeItem('gAccessToken');
-                updateGoogleUI();
-                if(tokenClient) tokenClient.requestAccessToken();
-            }
-        }
+            if(isManual) showToast("تم الحفظ في السحابة ✅");
+        } catch (e) { console.error(e); if(isManual) showToast("خطأ في الرفع"); }
     }
 
     /* --- End Google Logic --- */
 
+    let longPressTimer, isLongPress = false, currentCtxId = null, currentCtxType = null, pendingCallback = null;
+    let activeFolder = 'All', isSelectionMode = false, selectedIds = new Set(), isMoveAction = false, folderRenameTarget = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateGoogleUI();
+        window.history.replaceState({page: 'home'}, null, '');
+        window.onpopstate = () => {
+             document.querySelectorAll('.overlay').forEach(m => m.style.display='none');
+             document.getElementById('mainMenu').style.display='none';
+             if(document.getElementById('vaultPage').style.display === 'flex') {
+                 document.getElementById('vaultPage').style.display = 'none';
+                 if(isSelectionMode) toggleSelectionMode();
+             }
+        };
+    });
+
     function pushHistory() { window.history.pushState({page: 'inner'}, null, ''); }
     function goBack() { window.history.back(); }
-    
-    function submitPassword() {
-        const val = document.getElementById('globalPassInput').value;
-        const cb = pendingCallback;
-        goBack(); 
-        if(cb) { setTimeout(() => { cb(val); }, 200); }
-        pendingCallback = null;
-    }
 
-    // --- Save Account Flow ---
     function prepareSaveAccount() {
-        const email = document.getElementById('emailInput').value;
-        const pass = document.getElementById('passInput').value;
-        if (!email || !pass) { showToast("الرجاء تعبئة الخانات ⚠️"); return; }
-        
-        isMoveAction = false;
-        openFolderSelectModal("أين تريد حفظ الحساب؟");
+        const email = document.getElementById('emailInput').value, pass = document.getElementById('passInput').value;
+        if (!email || !pass) return showToast("أكمل البيانات ⚠️");
+        isMoveAction = false; openFolderSelectModal("حفظ في:");
     }
 
-    function saveAccount(targetFolder) {
-        const email = document.getElementById('emailInput').value;
-        const pass = document.getElementById('passInput').value;
-        
-        accounts.unshift({ id: Number(Date.now()), email, pass, folder: targetFolder });
+    function saveAccount(target) {
+        const email = document.getElementById('emailInput').value, pass = document.getElementById('passInput').value;
+        accounts.unshift({ id: Date.now(), email, pass, folder: target });
         localStorage.setItem('myPasswords', JSON.stringify(accounts));
-        
-        // Auto Sync
-        if(isGoogleLoggedIn) uploadToDrive();
-
-        document.getElementById('emailInput').value = '';
-        document.getElementById('passInput').value = '';
-        showToast("تم الحفظ في: " + targetFolder + " ✅");
-        renderVault();
+        uploadToDrive();
+        document.getElementById('emailInput').value = ''; document.getElementById('passInput').value = '';
+        showToast("تم الحفظ ✅"); renderVault();
     }
 
-    // --- Vault & Folders ---
     function renderFoldersBar() {
-        const bar = document.getElementById('foldersBar');
-        const addBtn = bar.querySelector('.add-folder-btn');
+        const bar = document.getElementById('foldersBar'), addBtn = bar.querySelector('.add-folder-btn');
         bar.innerHTML = '';
-        
-        const allChip = document.createElement('div');
-        allChip.className = `folder-chip ${activeFolder === 'All' ? 'active' : ''}`;
-        allChip.innerText = "الكل";
-        allChip.onclick = () => { activeFolder = 'All'; renderVault(); renderFoldersBar(); };
-        bar.appendChild(allChip);
-
+        const all = document.createElement('div'); all.className = `folder-chip ${activeFolder==='All'?'active':''}`; all.innerText = "الكل";
+        all.onclick = () => { activeFolder = 'All'; renderVault(); renderFoldersBar(); }; bar.appendChild(all);
         folders.forEach(f => {
-            const chip = document.createElement('div');
-            chip.className = `folder-chip ${activeFolder === f ? 'active' : ''}`;
-            chip.innerText = f;
-            chip.onclick = () => { activeFolder = f; renderVault(); renderFoldersBar(); };
-            
-            chip.onmousedown = () => startFolderPress(f);
-            chip.ontouchstart = () => startFolderPress(f);
-            chip.onmouseup = cancelPress;
-            chip.ontouchend = cancelPress;
-            
-            bar.appendChild(chip);
+            const c = document.createElement('div'); c.className = `folder-chip ${activeFolder===f?'active':''}`; c.innerText = f;
+            c.onclick = () => { activeFolder = f; renderVault(); renderFoldersBar(); };
+            c.onmousedown = () => startFolderPress(f); c.ontouchstart = () => startFolderPress(f);
+            c.onmouseup = cancelPress; c.ontouchend = cancelPress;
+            bar.appendChild(c);
         });
         bar.appendChild(addBtn);
     }
 
     function renderVault() {
-        const list = document.getElementById('vaultList');
-        const searchVal = document.getElementById('searchInput').value.toLowerCase();
+        const list = document.getElementById('vaultList'), search = document.getElementById('searchInput').value.toLowerCase();
         list.innerHTML = '';
-        
-        let displayAccounts = accounts;
-        
-        if (activeFolder !== 'All') {
-            displayAccounts = displayAccounts.filter(acc => acc.folder === activeFolder);
-        }
+        let display = accounts;
+        if(activeFolder !== 'All') display = display.filter(a => a.folder === activeFolder);
+        if(search) display = display.filter(a => a.email.toLowerCase().includes(search) || a.pass.toLowerCase().includes(search));
 
-        if(searchVal) {
-            displayAccounts = displayAccounts.filter(acc => acc.email.toLowerCase().includes(searchVal) || acc.pass.toLowerCase().includes(searchVal));
-        }
-
-        displayAccounts.forEach(acc => {
-            const card = document.createElement('div');
-            card.className = `account-card ${selectedIds.has(acc.id) ? 'selected-card' : ''}`;
-            card.setAttribute('data-id', acc.id);
-            card.onclick = (e) => handleCardClick(e, acc);
-
-            let leftSide = '';
-            if (isSelectionMode) {
-                leftSide = `<div class="selection-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg></div>`;
-            } else if (!searchVal && activeFolder !== 'All') {
-                leftSide = `<div class="drag-handle" onmousedown="initDrag(event)" ontouchstart="initDrag(event)">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
-                </div>`;
-            }
-
-            card.innerHTML = `
-                ${leftSide}
-                <div class="card-main">
-                    <div class="card-email" 
-                         onmousedown="startPress('email', ${acc.id})" ontouchstart="startPress('email', ${acc.id})" 
-                         onmouseup="cancelPress()" ontouchend="cancelPress()">
-                        <span>${acc.email}</span>
-                        <svg style="color:var(--primary); width:18px; height:18px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    </div>
-                    <div id="pass-${acc.id}" class="card-pass-pill hidden-pass"
-                        onmousedown="startPress('pass', ${acc.id})" ontouchstart="startPress('pass', ${acc.id})" 
-                        onmouseup="cancelPress()" ontouchend="cancelPress()">••••••••</div>
-                </div>
-            `;
-            list.appendChild(card);
+        display.forEach(acc => {
+            const c = document.createElement('div'); c.className = `account-card ${selectedIds.has(acc.id)?'selected-card':''}`;
+            c.onclick = (e) => handleCardClick(e, acc);
+            let left = isSelectionMode ? `<div class="selection-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg></div>` :
+                (!search && activeFolder !== 'All') ? `<div class="drag-handle" onmousedown="initDrag(event)" ontouchstart="initDrag(event)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></div>` : '';
+            c.innerHTML = `${left}<div class="card-main"><div class="card-email" onmousedown="startPress('email', ${acc.id})" ontouchstart="startPress('email', ${acc.id})" onmouseup="cancelPress()" ontouchend="cancelPress()"><span>${acc.email}</span><svg style="color:var(--primary); width:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path></svg></div><div id="pass-${acc.id}" class="card-pass-pill hidden-pass" onmousedown="startPress('pass', ${acc.id})" ontouchstart="startPress('pass', ${acc.id})" onmouseup="cancelPress()" ontouchend="cancelPress()">••••••••</div></div>`;
+            list.appendChild(c);
         });
-        
-        if(displayAccounts.length === 0) list.innerHTML = '<p style="color:#aaa;text-align:center; margin-top:30px;">لا توجد عناصر هنا</p>';
+        if(display.length === 0) list.innerHTML = '<p style="color:#aaa;text-align:center; margin-top:30px;">فارغ</p>';
     }
-
-    // --- Selection & Folder Management ---
 
     function toggleSelectionMode() {
-        isSelectionMode = !isSelectionMode;
-        selectedIds.clear();
-        
-        const btn = document.getElementById('selectToggleBtn');
-        const bottomBar = document.getElementById('bottomBar');
-        
-        if (isSelectionMode) {
-            btn.classList.add('active');
-            bottomBar.classList.add('visible');
-            document.getElementById('selectedCount').innerText = "0 محدد";
-        } else {
-            btn.classList.remove('active');
-            bottomBar.classList.remove('visible');
-        }
+        isSelectionMode = !isSelectionMode; selectedIds.clear();
+        document.getElementById('selectToggleBtn').classList.toggle('active');
+        document.getElementById('bottomBar').classList.toggle('visible');
+        document.getElementById('selectedCount').innerText = "0 محدد";
         renderVault();
     }
-
     function handleCardClick(e, acc) {
         if (isSelectionMode) {
-            if (selectedIds.has(acc.id)) selectedIds.delete(acc.id);
-            else selectedIds.add(acc.id);
-            
+            selectedIds.has(acc.id) ? selectedIds.delete(acc.id) : selectedIds.add(acc.id);
             document.getElementById('selectedCount').innerText = selectedIds.size + " محدد";
             renderVault();
         } else {
-            if(e.target.closest('.drag-handle')) return;
-            if(e.target.closest('.card-email')) return;
-            handlePassClick(acc.id);
+            if(!e.target.closest('.drag-handle') && !e.target.closest('.card-email')) handlePassClick(acc.id);
         }
     }
 
-    function openMoveModal() {
-        if(selectedIds.size === 0) return;
-        isMoveAction = true;
-        openFolderSelectModal("نقل " + selectedIds.size + " عنصر إلى:");
-    }
-
-    function openFolderSelectModal(title) {
-        pushHistory();
-        document.getElementById('folderModalTitle').innerText = title;
-        const listBody = document.getElementById('folderListModalBody');
-        listBody.innerHTML = '';
-
-        const addRow = document.createElement('div');
-        addRow.className = 'folder-item-row';
-        addRow.style.color = 'var(--primary)';
-        addRow.innerHTML = '+ إنشاء مجلد جديد';
-        addRow.onclick = () => { goBack(); setTimeout(openAddFolderModal, 200); };
-        listBody.appendChild(addRow);
-
-        folders.forEach(f => {
-            const row = document.createElement('div');
-            row.className = 'folder-item-row';
-            row.innerText = f;
-            row.onclick = () => {
-                goBack();
-                if (isMoveAction) executeMove(f);
-                else saveAccount(f);
-            };
-            listBody.appendChild(row);
-        });
-
-        document.getElementById('folderSelectModal').style.display = 'flex';
-    }
-
-    function executeMove(targetFolder) {
-        accounts.forEach(acc => {
-            if(selectedIds.has(acc.id)) acc.folder = targetFolder;
-        });
-        localStorage.setItem('myPasswords', JSON.stringify(accounts));
-        
-        // Auto Sync
-        if(isGoogleLoggedIn) uploadToDrive();
-
-        toggleSelectionMode(); 
-        activeFolder = targetFolder; 
-        renderFoldersBar();
-        renderVault();
-        showToast("تم النقل بنجاح 📂");
-    }
-
-    // --- Add / Rename Folder ---
-    function openAddFolderModal(renameTarget = null) {
-        pushHistory();
-        folderRenameTarget = renameTarget;
-        document.getElementById('addFolderTitle').innerText = renameTarget ? "تغيير اسم المجلد" : "مجلد جديد";
-        const input = document.getElementById('folderNameInput');
-        input.value = renameTarget || '';
-        document.getElementById('addFolderModal').style.display = 'flex';
-        input.focus();
-    }
-
-    function submitFolder() {
-        const name = document.getElementById('folderNameInput').value.trim();
-        if(!name) return;
-        
-        if (folderRenameTarget) {
-            const oldName = folderRenameTarget;
-            const index = folders.indexOf(oldName);
-            if(index !== -1) folders[index] = name;
-            accounts.forEach(acc => { if(acc.folder === oldName) acc.folder = name; });
-        } else {
-            if(!folders.includes(name)) folders.push(name);
-        }
-        
-        localStorage.setItem('myFolders', JSON.stringify(folders));
-        localStorage.setItem('myPasswords', JSON.stringify(accounts));
-        
-        // Auto Sync
-        if(isGoogleLoggedIn) uploadToDrive();
-
-        goBack(); 
-        renderFoldersBar();
-        renderVault();
-    }
-
-    function startFolderPress(f) {
-        isLongPress = false;
-        longPressTimer = setTimeout(() => { 
-            isLongPress = true; 
-            if(f !== 'عام') openAddFolderModal(f); 
-            else showToast("لا يمكن تعديل المجلد العام");
-        }, 600);
-    }
-
-    // --- Drag & Drop ---
-    let draggingItem = null;
-    function initDrag(e) {
-        if(isSelectionMode) return;
-        const handle = e.target.closest('.drag-handle');
-        if(!handle) return;
-        draggingItem = handle.closest('.account-card');
-        const list = document.getElementById('vaultList');
-        list.addEventListener('mousemove', onDragMove);
-        list.addEventListener('touchmove', onDragMove, {passive: false});
-        document.addEventListener('mouseup', onDragEnd);
-        document.addEventListener('touchend', onDragEnd);
-        draggingItem.classList.add('dragging');
-    }
-
-    function onDragMove(e) {
-        if(!draggingItem) return;
-        e.preventDefault();
-        const list = document.getElementById('vaultList');
-        let clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-        const siblings = [...list.querySelectorAll('.account-card:not(.dragging)')];
-        let nextSibling = siblings.find(sibling => {
-            return clientY <= sibling.getBoundingClientRect().top + sibling.offsetHeight / 2;
-        });
-        list.insertBefore(draggingItem, nextSibling);
-    }
-
-    function onDragEnd(e) {
-        if(!draggingItem) return;
-        draggingItem.classList.remove('dragging');
-        draggingItem = null;
-        const list = document.getElementById('vaultList');
-        list.removeEventListener('mousemove', onDragMove);
-        list.removeEventListener('touchmove', onDragMove);
-        document.removeEventListener('mouseup', onDragEnd);
-        document.removeEventListener('touchend', onDragEnd);
-        saveNewOrder();
-    }
-
-    function saveNewOrder() {
-        if (activeFolder === 'All') {
-            const list = document.getElementById('vaultList');
-            const cards = list.querySelectorAll('.account-card');
-            const newAccounts = [];
-            cards.forEach(card => {
-                const id = Number(card.getAttribute('data-id'));
-                const acc = accounts.find(a => a.id === id);
-                if(acc) newAccounts.push(acc);
-            });
-            accounts = newAccounts;
-        } else {
-            const list = document.getElementById('vaultList');
-            const cards = list.querySelectorAll('.account-card');
-            const folderIds = Array.from(cards).map(c => Number(c.getAttribute('data-id')));
-            const otherItems = accounts.filter(a => a.folder !== activeFolder);
-            const sortedFolderItems = [];
-            folderIds.forEach(id => {
-                 const acc = accounts.find(a => a.id === id);
-                 if(acc) sortedFolderItems.push(acc);
-            });
-            accounts = [...sortedFolderItems, ...otherItems];
-        }
-        localStorage.setItem('myPasswords', JSON.stringify(accounts));
-        
-        // Auto Sync
-        if(isGoogleLoggedIn) uploadToDrive();
-    }
-
-    // --- Standard Logic ---
     function handlePassClick(id) {
         if(isLongPress || isSelectionMode) return;
-        const el = document.getElementById(`pass-${id}`);
-        const acc = accounts.find(a => a.id === id);
-        if(el.classList.contains('hidden-pass')) {
-             el.innerText = acc.pass; 
-             el.classList.remove('hidden-pass');
-             el.style.fontSize = "16px";
-             el.style.letterSpacing = "0";
-        }
-        else { 
-            el.innerText = '••••••••'; 
-            el.classList.add('hidden-pass'); 
-            el.style.fontSize = "20px";
-            el.style.letterSpacing = "2px";
-        }
+        const el = document.getElementById(`pass-${id}`), acc = accounts.find(a => a.id === id);
+        if(el.classList.contains('hidden-pass')) { el.innerText = acc.pass; el.classList.remove('hidden-pass'); el.style.fontSize = "16px"; el.style.letterSpacing = "0"; }
+        else { el.innerText = '••••••••'; el.classList.add('hidden-pass'); el.style.fontSize = "20px"; el.style.letterSpacing = "2px"; }
     }
 
-    function startPress(type, id) {
-        if(isSelectionMode) return;
-        isLongPress = false;
-        longPressTimer = setTimeout(() => { isLongPress = true; openContextMenu(type, id); }, 600);
-    }
+    function startPress(t, id) { if(!isSelectionMode) { isLongPress = false; longPressTimer = setTimeout(() => { isLongPress = true; openContextMenu(t, id); }, 600); } }
+    function startFolderPress(f) { isLongPress = false; longPressTimer = setTimeout(() => { isLongPress = true; if(f!=='عام') openAddFolderModal(f); else showToast("عام لا يعدل"); }, 600); }
     function cancelPress() { clearTimeout(longPressTimer); }
 
-    function openContextMenu(type, id) {
-        pushHistory();
-        currentCtxId = id; currentCtxType = type;
-        const title = type === 'email' ? 'خيارات الإيميل' : 'خيارات كلمة السر';
-        document.getElementById('ctxTitle').innerText = title;
-        document.getElementById('contextModal').style.display = 'flex';
-        if (navigator.vibrate) navigator.vibrate(50);
-    }
-
-    function ctxAction(action) {
-        goBack();
-        const targetId = Number(currentCtxId);
-        const acc = accounts.find(a => a.id === targetId);
-        
+    function openContextMenu(t, id) { pushHistory(); currentCtxId = id; currentCtxType = t; document.getElementById('ctxTitle').innerText = t==='email'?'خيارات الإيميل':'خيارات الباسورد'; document.getElementById('contextModal').style.display='flex'; if(navigator.vibrate) navigator.vibrate(50); }
+    function ctxAction(act) {
+        goBack(); const acc = accounts.find(a => a.id === currentCtxId);
         setTimeout(() => {
-            if (!acc) return; 
-            if (action === 'copy') {
-                copyToClipboard(currentCtxType === 'email' ? acc.email : acc.pass);
-            } else if (action === 'delete') {
-                customConfirm("حذف الحساب نهائياً؟", () => {
-                    accounts = accounts.filter(a => a.id !== targetId);
-                    localStorage.setItem('myPasswords', JSON.stringify(accounts));
-                    
-                    // Auto Sync
-                    if(isGoogleLoggedIn) uploadToDrive();
-
-                    renderVault(); 
-                    showToast("تم الحذف 🗑️");
-                });
-            } else if (action === 'edit') {
-                document.getElementById('emailInput').value = acc.email;
-                document.getElementById('passInput').value = acc.pass;
-                accounts = accounts.filter(a => a.id !== targetId);
-                localStorage.setItem('myPasswords', JSON.stringify(accounts));
-                
-                // Auto Sync (removing old)
-                if(isGoogleLoggedIn) uploadToDrive();
-
-                renderVault(); 
-                if(document.getElementById('vaultPage').style.display === 'flex') goBack();
-                showToast("جاري التعديل...");
-            }
-        }, 250);
-    }
-
-    let vaultPressTimer;
-    function startVaultPress() {
-        isLongPress = false;
-        vaultPressTimer = setTimeout(() => { isLongPress = true; handleVaultLongPress(); }, 800);
-    }
-    function cancelVaultPress() { clearTimeout(vaultPressTimer); }
-
-    function handleVaultLongPress() {
-        const currentPass = localStorage.getItem('vaultPass');
-        if (currentPass) {
-            openPasswordModal("إلغاء قفل المحفوظات", (input) => {
-                if (input === currentPass) { localStorage.removeItem('vaultPass'); showToast("تم إلغاء القفل 🔓"); }
-                else showToast("كلمة مرور خاطئة ❌");
-            });
-        } else {
-            openPasswordModal("تعيين كلمة مرور جديدة", (input) => {
-                if(input) { localStorage.setItem('vaultPass', input); showToast("تم القفل 🔒"); }
-            });
-        }
-    }
-
-    function openVaultCheck() {
-        if(isLongPress) return; 
-        const vaultPass = localStorage.getItem('vaultPass');
-        if (vaultPass) {
-            openPasswordModal("أدخل رمز المحفوظات", (input) => {
-                if(input === vaultPass) openVault();
-                else showToast("رمز خاطئ ❌");
-            });
-        } else openVault();
-    }
-
-    function openVault() {
-        pushHistory();
-        renderFoldersBar();
-        renderVault();
-        document.getElementById('vaultPage').style.display = 'flex';
-    }
-
-    function safeToggleMenu(event) {
-        if(event) event.stopPropagation();
-        const menu = document.getElementById('mainMenu');
-        if (menu.style.display === 'flex') { menu.style.display = 'none'; return; }
-        const appPass = localStorage.getItem('appPass');
-        if (appPass) {
-            openPasswordModal("القائمة مقفلة 🔒", (input) => {
-                if (input === appPass) { menu.style.display = 'flex'; } 
-                else { showToast("كلمة المرور خاطئة ❌"); }
-            });
-        } else { menu.style.display = 'flex'; }
-    }
-
-    window.onclick = function(event) {
-        if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-btn')) {
-            const menu = document.getElementById('mainMenu');
-            if (menu && menu.style.display === 'flex') { menu.style.display = 'none'; }
-        }
-    }
-
-    function handleAppLockSettings() {
-        document.getElementById('mainMenu').style.display = 'none';
-        const appPass = localStorage.getItem('appPass');
-        if(appPass) {
-            openPasswordModal("أدخل كلمة المرور للإلغاء", (input) => {
-                if(input === appPass) { localStorage.removeItem('appPass'); showToast("تم إلغاء الحماية 🔓"); updateMenuLabels(); }
-                else showToast("خطأ ❌");
-            });
-        } else {
-            openPasswordModal("تعيين كلمة مرور للتطبيق", (input) => {
-                if(input) { localStorage.setItem('appPass', input); showToast("تم الحماية 🛡️"); updateMenuLabels(); }
-            });
-        }
-    }
-
-    function updateMenuLabels() {
-        const appPass = localStorage.getItem('appPass');
-        const span = document.querySelector('#menuSetPass span');
-        if(appPass) { span.innerText = "إزالة قفل التطبيق"; span.style.color = "var(--danger)"; }
-        else { span.innerText = "تعيين كلمة مرور للتطبيق"; span.style.color = "var(--text)"; }
-    }
-
-    function openPasswordModal(title, callback) {
-        pushHistory();
-        document.getElementById('passModalTitle').innerText = title;
-        document.getElementById('globalPassInput').value = '';
-        document.getElementById('passwordModal').style.display = 'flex';
-        document.getElementById('globalPassInput').focus();
-        pendingCallback = callback;
-    }
-
-    function customConfirm(msg, yesCallback) {
-        pushHistory();
-        document.getElementById('confirmTitle').innerText = 'تأكيد';
-        document.getElementById('confirmMessage').innerText = msg;
-        const btn = document.getElementById('confirmYesBtn');
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.onclick = () => {
-            goBack();
-            setTimeout(yesCallback, 200);
-        };
-        document.getElementById('confirmModal').style.display = 'flex';
-    }
-
-    function confirmDeleteAll() {
-        document.getElementById('mainMenu').style.display = 'none';
-        setTimeout(() => {
-             customConfirm("حذف كل البيانات؟", () => {
-                localStorage.clear(); accounts = []; folders = ["عام", "فيسبوك", "جوجل"]; 
-                
-                // Auto Sync (Clear Cloud as well if needed, or just upload empty)
-                if(isGoogleLoggedIn) uploadToDrive();
-
-                showToast("تم الحذف الشامل"); renderVault(); updateMenuLabels();
-            });
+            if(!acc) return;
+            if(act === 'copy') copyToClipboard(currentCtxType==='email'?acc.email:acc.pass);
+            else if(act === 'delete') customConfirm("حذف؟", () => { accounts = accounts.filter(a=>a.id!==currentCtxId); localStorage.setItem('myPasswords', JSON.stringify(accounts)); uploadToDrive(); renderVault(); });
+            else if(act === 'edit') { document.getElementById('emailInput').value = acc.email; document.getElementById('passInput').value = acc.pass; accounts = accounts.filter(a=>a.id!==currentCtxId); localStorage.setItem('myPasswords', JSON.stringify(accounts)); uploadToDrive(); renderVault(); if(document.getElementById('vaultPage').style.display==='flex') goBack(); }
         }, 200);
     }
 
-    function showToast(msg) {
-        const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity = '1';
-        setTimeout(() => t.style.opacity = '0', 2000);
+    function openMoveModal() { if(selectedIds.size>0) { isMoveAction = true; openFolderSelectModal("نقل إلى:"); } }
+    function openFolderSelectModal(t) {
+        pushHistory(); document.getElementById('folderModalTitle').innerText = t; const b = document.getElementById('folderListModalBody'); b.innerHTML = '';
+        const n = document.createElement('div'); n.className='folder-item-row'; n.style.color='var(--primary)'; n.innerText='+ جديد'; n.onclick=()=>{goBack();setTimeout(openAddFolderModal,200);}; b.appendChild(n);
+        folders.forEach(f => { const r = document.createElement('div'); r.className='folder-item-row'; r.innerText=f; r.onclick=()=>{goBack(); isMoveAction ? executeMove(f) : saveAccount(f);}; b.appendChild(r); });
+        document.getElementById('folderSelectModal').style.display='flex';
+    }
+    function executeMove(f) { accounts.forEach(a => { if(selectedIds.has(a.id)) a.folder = f; }); localStorage.setItem('myPasswords', JSON.stringify(accounts)); uploadToDrive(); toggleSelectionMode(); activeFolder = f; renderFoldersBar(); renderVault(); showToast("تم النقل"); }
+
+    function openAddFolderModal(ren=null) { pushHistory(); folderRenameTarget=ren; document.getElementById('addFolderTitle').innerText=ren?"تغيير اسم":"مجلد جديد"; document.getElementById('folderNameInput').value=ren||''; document.getElementById('addFolderModal').style.display='flex'; }
+    function submitFolder() {
+        const n = document.getElementById('folderNameInput').value.trim(); if(!n) return;
+        if(folderRenameTarget) { const idx = folders.indexOf(folderRenameTarget); if(idx!==-1) folders[idx]=n; accounts.forEach(a=>{if(a.folder===folderRenameTarget)a.folder=n;}); }
+        else if(!folders.includes(n)) folders.push(n);
+        localStorage.setItem('myFolders', JSON.stringify(folders)); localStorage.setItem('myPasswords', JSON.stringify(accounts)); uploadToDrive();
+        goBack(); renderFoldersBar(); renderVault();
     }
 
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => showToast("تم النسخ ✅"))
-        .catch(() => {
-            const ta = document.createElement('textarea'); ta.value = text;
-            document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-            document.body.removeChild(ta); showToast("تم النسخ ✅");
-        });
+    /* Drag Drop */
+    let dragItem = null;
+    function initDrag(e) { if(isSelectionMode) return; const h=e.target.closest('.drag-handle'); if(!h)return; dragItem=h.closest('.account-card'); document.getElementById('vaultList').addEventListener('mousemove', onDragMove); document.getElementById('vaultList').addEventListener('touchmove', onDragMove, {passive:false}); document.addEventListener('mouseup', onDragEnd); document.addEventListener('touchend', onDragEnd); dragItem.classList.add('dragging'); }
+    function onDragMove(e) { if(!dragItem)return; e.preventDefault(); const lst=document.getElementById('vaultList'), cy=e.type==='touchmove'?e.touches[0].clientY:e.clientY, sibs=[...lst.querySelectorAll('.account-card:not(.dragging)')], next=sibs.find(s=>cy<=s.getBoundingClientRect().top+s.offsetHeight/2); lst.insertBefore(dragItem, next); }
+    function onDragEnd() { if(!dragItem)return; dragItem.classList.remove('dragging'); dragItem=null; document.removeEventListener('mouseup',onDragEnd); document.removeEventListener('touchend',onDragEnd); saveOrder(); }
+    function saveOrder() {
+        const ids = Array.from(document.querySelectorAll('.account-card')).map(c=>Number(c.getAttribute('data-id')));
+        if(activeFolder==='All') { accounts = ids.map(id=>accounts.find(a=>a.id===id)).filter(Boolean); }
+        else { const fItems = ids.map(id=>accounts.find(a=>a.id===id)).filter(Boolean), others = accounts.filter(a=>a.folder!==activeFolder); accounts=[...fItems, ...others]; }
+        localStorage.setItem('myPasswords', JSON.stringify(accounts)); uploadToDrive();
     }
 
-    function showBackupModal() {
-        document.getElementById('mainMenu').style.display = 'none';
-        pushHistory();
-        const backupData = { accounts, folders };
-        document.getElementById('backupText').value = JSON.stringify(backupData, null, 2);
-        document.getElementById('backupModal').style.display = 'flex';
+    /* Vault Lock */
+    let vpTimer; function startVaultPress() { isLongPress=false; vpTimer=setTimeout(()=>{isLongPress=true; handleVaultLongPress();},800); }
+    function cancelVaultPress() { clearTimeout(vpTimer); }
+    function handleVaultLongPress() { const p=localStorage.getItem('vaultPass'); p ? openPasswordModal("إلغاء القفل", v=>{if(v===p){localStorage.removeItem('vaultPass');showToast("تم الإلغاء");}else showToast("خطأ");}) : openPasswordModal("تعيين قفل", v=>{if(v){localStorage.setItem('vaultPass',v);showToast("تم القفل");}}); }
+    function openVaultCheck() { if(isLongPress)return; const p=localStorage.getItem('vaultPass'); p ? openPasswordModal("الرمز السري", v=>{if(v===p)openVault();else showToast("خطأ");}) : openVault(); }
+    function openVault() { pushHistory(); renderFoldersBar(); renderVault(); document.getElementById('vaultPage').style.display='flex'; }
+
+    /* App Lock & Menu */
+    function safeToggleMenu(e) {
+        if(e)e.stopPropagation(); const m=document.getElementById('mainMenu'); if(m.style.display==='flex'){m.style.display='none';return;}
+        const p=localStorage.getItem('appPass'); p ? openPasswordModal("مغلق 🔒", v=>{if(v===p)m.style.display='flex';else showToast("خطأ");}) : m.style.display='flex';
     }
-    function copyBackup() {
-        document.getElementById('backupText').select(); document.execCommand('copy'); showToast("تم النسخ");
-    }
+    window.onclick = (e) => { if(!e.target.matches('.menu-btn') && !e.target.closest('.menu-btn')) document.getElementById('mainMenu').style.display='none'; };
+    function handleAppLockSettings() { document.getElementById('mainMenu').style.display='none'; const p=localStorage.getItem('appPass'); p ? openPasswordModal("إلغاء الحماية", v=>{if(v===p){localStorage.removeItem('appPass');showToast("تم الإلغاء");updateMenuLabels();}else showToast("خطأ");}) : openPasswordModal("تعيين كلمة مرور", v=>{if(v){localStorage.setItem('appPass',v);showToast("تم");updateMenuLabels();}}); }
+    function updateMenuLabels() { const p=localStorage.getItem('appPass'), s=document.querySelector('#menuSetPass span'); if(p){s.innerText="إزالة القفل";s.style.color="var(--danger)";}else{s.innerText="تعيين قفل";s.style.color="var(--text)";} }
+
+    /* Helpers */
+    function openPasswordModal(t, cb) { pushHistory(); document.getElementById('passModalTitle').innerText=t; document.getElementById('globalPassInput').value=''; document.getElementById('passwordModal').style.display='flex'; document.getElementById('globalPassInput').focus(); pendingCallback=cb; }
+    function submitPassword() { const v=document.getElementById('globalPassInput').value; goBack(); if(pendingCallback) setTimeout(()=>pendingCallback(v),200); pendingCallback=null; }
+    function customConfirm(m, cb) { pushHistory(); document.getElementById('confirmMessage').innerText=m; const b=document.getElementById('confirmYesBtn'), n=b.cloneNode(true); b.parentNode.replaceChild(n,b); n.onclick=()=>{goBack();setTimeout(cb,200);}; document.getElementById('confirmModal').style.display='flex'; }
+    function confirmDeleteAll() { document.getElementById('mainMenu').style.display='none'; customConfirm("حذف الكل؟", ()=>{localStorage.clear(); accounts=[]; folders=["عام","فيسبوك","جوجل"]; uploadToDrive(); showToast("تم الحذف"); renderVault();}); }
+    function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2000); }
+    function copyToClipboard(t) { navigator.clipboard.writeText(t).then(()=>showToast("نسخ ✅")); }
     
-    function showImportModal() {
-        document.getElementById('mainMenu').style.display = 'none';
-        pushHistory();
-        document.getElementById('importText').value = '';
-        document.getElementById('importModal').style.display = 'flex';
-        setTimeout(() => document.getElementById('importText').focus(), 300);
-    }
-
-    async function pasteFromClipboard() {
-        try {
-            const text = await navigator.clipboard.readText();
-            document.getElementById('importText').value = text;
-            showToast("تم اللصق ✅");
-        } catch (err) {
-            document.getElementById('importText').focus();
-            showToast("اضغط مطولاً داخل المربع للصق 👆");
-        }
-    }
-
+    function showBackupModal() { document.getElementById('mainMenu').style.display='none'; pushHistory(); document.getElementById('backupText').value=JSON.stringify({accounts,folders},null,2); document.getElementById('backupModal').style.display='flex'; }
+    function copyBackup() { document.getElementById('backupText').select(); document.execCommand('copy'); showToast("تم النسخ"); }
+    function showImportModal() { document.getElementById('mainMenu').style.display='none'; pushHistory(); document.getElementById('importText').value=''; document.getElementById('importModal').style.display='flex'; }
+    async function pasteFromClipboard() { try{const t=await navigator.clipboard.readText(); document.getElementById('importText').value=t; showToast("تم اللصق");}catch{showToast("لا يمكن اللصق");} }
     function performImport() {
-        try {
-            const val = document.getElementById('importText').value;
-            if(!val) { showToast("الحقل فارغ ❌"); return; }
-            const data = JSON.parse(val);
-            if(Array.isArray(data)) {
-                accounts = data; 
-                accounts.forEach(acc => { if(!acc.folder) acc.folder = 'عام'; });
-            } else if (data.accounts && data.folders) {
-                accounts = data.accounts;
-                folders = data.folders;
-            } else {
-                showToast("الكود غير صحيح ❌"); return;
-            }
-            localStorage.setItem('myPasswords', JSON.stringify(accounts));
-            localStorage.setItem('myFolders', JSON.stringify(folders));
-            
-            // Auto Sync
-            if(isGoogleLoggedIn) uploadToDrive();
-
-            goBack(); showToast("تمت الاستعادة بنجاح 🎉"); renderVault();
-        } catch(e) { showToast("تأكد من صحة الكود ⚠️"); }
+        try { const d=JSON.parse(document.getElementById('importText').value); if(Array.isArray(d)) accounts=d; else {accounts=d.accounts; folders=d.folders;}
+        localStorage.setItem('myPasswords', JSON.stringify(accounts)); localStorage.setItem('myFolders', JSON.stringify(folders)); uploadToDrive(); goBack(); showToast("تم"); renderVault(); } catch{showToast("كود خاطئ");}
     }
 </script>
 

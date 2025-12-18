@@ -515,7 +515,7 @@
         }
     }
 
-    // --- SYNC ENGINE ---
+    // --- SMART SYNC & AUTO REPAIR ---
     async function syncFromCloud(silent = false) {
         if(!gAccessToken) return;
         setSyncLoader(true);
@@ -523,8 +523,9 @@
         
         try {
             const timestamp = new Date().getTime();
+            // البحث مع الترتيب حسب الأحدث للحصول على أحدث ملف
             const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`;
-            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&t=${timestamp}`, {
+            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&orderBy=modifiedTime desc&t=${timestamp}`, {
                 headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Cache-Control': 'no-cache' }
             });
             if(searchResp.status === 401) { 
@@ -532,34 +533,97 @@
             }
             const data = await searchResp.json();
 
+            // *** Auto-Repair Logic: Handle Duplicates ***
             if (data.files && data.files.length > 0) {
-                const fileId = data.files[0].id;
-                const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&t=${timestamp}`, {
-                    headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Cache-Control': 'no-cache' }
-                });
-                const cloudContent = await fileResp.json();
                 
-                if(cloudContent && Array.isArray(cloudContent.accounts)) {
-                    const localIds = new Set(accounts.map(a => a.id));
-                    let changed = false;
-                    cloudContent.accounts.forEach(acc => {
-                        if(!localIds.has(acc.id)) { accounts.push(acc); changed = true; }
+                // إذا كان هناك أكثر من ملف، نقوم بالدمج الذكي
+                if (data.files.length > 1) {
+                    if(!silent) showToast("تم اكتشاف ملفات مكررة، جاري التوحيد...");
+                    
+                    let mergedAccounts = [...accounts];
+                    let mergedFolders = [...folders];
+                    const processedIds = new Set(accounts.map(a => a.id));
+
+                    // تحميل ودمج بيانات كل الملفات
+                    for (const f of data.files) {
+                        try {
+                             const fResp = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&t=${timestamp}`, {
+                                headers: { 'Authorization': `Bearer ${gAccessToken}` }
+                            });
+                            const fData = await fResp.json();
+                            
+                            if(fData.accounts) {
+                                fData.accounts.forEach(acc => {
+                                    if(!processedIds.has(acc.id)) {
+                                        mergedAccounts.push(acc);
+                                        processedIds.add(acc.id);
+                                    }
+                                });
+                            }
+                            if(fData.folders) {
+                                fData.folders.forEach(fo => { if(!mergedFolders.includes(fo)) mergedFolders.push(fo); });
+                            }
+                        } catch(e) {}
+                    }
+
+                    // تحديث أحدث ملف بالبيانات المدمجة
+                    const masterFileId = data.files[0].id; // الأحدث
+                    const payload = { accounts: mergedAccounts, folders: mergedFolders };
+                    const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+                    
+                    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${masterFileId}?uploadType=media`, {
+                        method: 'PATCH',
+                        headers: {'Authorization': `Bearer ${gAccessToken}`, 'Content-Type': 'application/json'},
+                        body: blob
                     });
-                    const localFolders = new Set(folders);
-                    (cloudContent.folders || []).forEach(f => {
-                        if(!localFolders.has(f)) { folders.push(f); changed = true; }
+
+                    // حذف الملفات القديمة الزائدة
+                    for (let i = 1; i < data.files.length; i++) {
+                        await deleteFile(data.files[i].id);
+                    }
+
+                    // تحديث الواجهة
+                    accounts = mergedAccounts;
+                    folders = mergedFolders;
+                    saveToLocal();
+                    renderVault();
+                    if(!silent) showToast("تم إصلاح وتوحيد البيانات ✅");
+
+                } else {
+                    // الحالة الطبيعية: ملف واحد فقط
+                    const fileId = data.files[0].id;
+                    const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&t=${timestamp}`, {
+                        headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Cache-Control': 'no-cache' }
                     });
-                    if(changed) {
-                        saveToLocal(); renderVault();
-                        if(!silent) showToast("تم جلب بيانات جديدة ✅");
-                    } else if(!silent) showToast("أنت على أحدث نسخة");
+                    const cloudContent = await fileResp.json();
+                    
+                    if(cloudContent && Array.isArray(cloudContent.accounts)) {
+                        const localIds = new Set(accounts.map(a => a.id));
+                        let changed = false;
+                        cloudContent.accounts.forEach(acc => {
+                            if(!localIds.has(acc.id)) { accounts.push(acc); changed = true; }
+                        });
+                        
+                        const localFolders = new Set(folders);
+                        (cloudContent.folders || []).forEach(f => {
+                            if(!localFolders.has(f)) { folders.push(f); changed = true; }
+                        });
+
+                        if(changed) {
+                            saveToLocal(); renderVault();
+                            if(!silent) showToast("تم جلب بيانات جديدة ✅");
+                        } else if(!silent) showToast("أنت على أحدث نسخة");
+                    }
                 }
+            } else {
+                 // لا يوجد ملف، نرفع
+                 if(accounts.length > 0) uploadToDrive(true);
             }
         } catch(e) { console.error(e); }
         setSyncLoader(false);
     }
 
-    // --- UPLOAD ENGINE (FIXED) ---
+    // --- UPLOAD ENGINE ---
     async function uploadToDrive(silent = true) {
         if(!gAccessToken) return;
         setSyncLoader(true);
@@ -567,21 +631,23 @@
         
         try {
             const timestamp = new Date().getTime();
-            // 1. Find File
+            // البحث عن الملفات الموجودة
             const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`;
-            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&t=${timestamp}`, {
+            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&orderBy=modifiedTime desc&t=${timestamp}`, {
                 headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Cache-Control': 'no-cache' }
             });
             const data = await searchResp.json();
 
             let finalAccounts = [...accounts];
             let finalFolders = [...folders];
-            let fileId = null;
+            let targetFileId = null;
 
-            // 2. Read & Merge
+            // إذا وجدنا ملفات (واحد أو أكثر)، نستخدم الأحدث وندمج معه
             if (data.files && data.files.length > 0) {
-                fileId = data.files[0].id;
-                const cloudResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&t=${timestamp}`, {
+                targetFileId = data.files[0].id; // الأحدث
+                
+                // جلب بيانات السحابة للدمج
+                const cloudResp = await fetch(`https://www.googleapis.com/drive/v3/files/${targetFileId}?alt=media&t=${timestamp}`, {
                     headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Cache-Control': 'no-cache' }
                 });
                 const cloudData = await cloudResp.json();
@@ -596,52 +662,49 @@
                         if(!localFolderSet.has(cF)) finalFolders.push(cF);
                     });
                 }
+                
+                // تنظيف الملفات الزائدة إن وجدت أثناء الرفع
+                if(data.files.length > 1) {
+                    for(let i=1; i<data.files.length; i++) await deleteFile(data.files[i].id);
+                }
             }
 
-            // 3. Update File
+            // تجهيز البيانات
             const payload = { accounts: finalAccounts, folders: finalFolders };
-            const fileContent = JSON.stringify(payload);
-            const fileBlob = new Blob([fileContent], { type: 'application/json' });
+            const fileBlob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
 
-            let uploadResp;
-            if (fileId) {
-                // FIXED: Use direct media upload for updates (Most Reliable)
-                uploadResp = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+            if (targetFileId) {
+                // تحديث الملف الموجود
+                await fetch(`https://www.googleapis.com/upload/drive/v3/files/${targetFileId}?uploadType=media`, {
                     method: 'PATCH',
-                    headers: { 
-                        'Authorization': `Bearer ${gAccessToken}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Content-Type': 'application/json' },
                     body: fileBlob
                 });
             } else {
-                // Use multipart for new creation
+                // إنشاء جديد
                 const metadata = { name: FILENAME, mimeType: 'application/json', parents: ['appDataFolder'] };
                 const form = new FormData();
                 form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                 form.append('file', fileBlob);
 
-                uploadResp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${gAccessToken}` },
                     body: form
                 });
             }
 
-            // 4. Verification Check
-            if (!uploadResp.ok) throw new Error("Upload failed with status " + uploadResp.status);
-
-            // Update Local State
+            // تحديث المحلي
             accounts = finalAccounts;
             folders = finalFolders;
             saveToLocal();
             renderVault();
             
-            if(!silent) showToast("تم الحفظ في السحابة فعلياً ✅");
+            if(!silent) showToast("تم الحفظ في السحابة ✅");
             
         } catch(e) { 
             console.error(e); 
-            showToast("فشل الرفع! تأكد من الإنترنت ❌"); 
+            showToast("فشل الرفع! ❌"); 
         }
         setSyncLoader(false);
     }

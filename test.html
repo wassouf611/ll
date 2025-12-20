@@ -1,0 +1,617 @@
+<!DOCTYPE html>  
+<html lang="ar" dir="rtl">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+    <title>ملاحظاتي السحابية ☁️</title>  
+    
+    <!-- مكتبة جوجل -->
+    <script src="https://accounts.google.com/gsi/client" onload="initGoogleLib()" async defer></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@700&display=swap" rel="stylesheet">  
+    <style>  
+        :root {  
+            --bg-color: #f8fafc;  
+            --primary-color: #2563eb;  
+            --folder-color: #f59e0b; 
+            --primary-gradient: linear-gradient(135deg, #2563eb, #1d4ed8);
+            --secondary-color: #7c3aed;   
+            --success-color: #059669;  
+            --danger-color: #dc2626;   
+            --card-color: #ffffff;  
+            --text-color: #1e293b;  
+            --text-secondary: #64748b;  
+            --light-bg: #f1f5f9;  
+            --border-color: #e2e8f0;   
+            --selection-color: #16a34a;  
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);  
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);  
+            --radius: 18px;  
+            --google-blue: #1a73e8;
+        }  
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }  
+
+        body {  
+            font-family: 'Tajawal', sans-serif;  
+            background-color: var(--bg-color);  
+            margin: 0; padding: 20px; color: var(--text-color);  
+            padding-bottom: 120px; -webkit-user-select: none; user-select: none;           
+        }  
+          
+        input, textarea { -webkit-user-select: text !important; user-select: text !important; }  
+
+        /* --- شاشة الدخول الإجبارية (بما أنه سحابي فقط) --- */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #f0f2f5; z-index: 6000; 
+            display: flex; flex-direction: column; /* ظاهر افتراضياً */
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .login-card {
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center;
+            width: 100%; max-width: 400px;
+        }
+        .google-btn-auth {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background-color: var(--google-blue); color: white; border: none;
+            padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 700;
+            cursor: pointer; width: 100%; margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3);
+        }
+
+        /* --- مؤشر الحالة السحابي --- */
+        #cloudStatus {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.9); color: white;
+            padding: 8px 16px; border-radius: 20px; z-index: 2000;
+            font-size: 0.9rem; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: top 0.3s;
+        }
+        #cloudStatus.hidden { top: -60px; }
+        .spinner {
+            width: 14px; height: 14px; border: 2px solid #fff; border-top-color: transparent;
+            border-radius: 50%; animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- بقية التنسيقات (كما هي) --- */
+        .header-content { text-align: center; margin-bottom: 20px; padding-top: 40px; }  
+        h1 { color: var(--primary-color); font-weight: 800; font-size: 2.2rem; margin: 0; }  
+        
+        #navBar { display: none; align-items: center; margin-bottom: 15px; background: white; padding: 10px; border-radius: 12px; box-shadow: var(--shadow-sm); }
+        .back-btn { background: var(--light-bg); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; color: var(--primary-color); font-weight: bold; }
+        
+        .settings-btn { position: absolute; top: 10px; left: 10px; font-size: 1.8rem; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; }  
+        
+        .search-container { margin-bottom: 20px; position: relative; }  
+        #searchInput { width: 100%; padding: 16px; border-radius: var(--radius); border: none; box-shadow: var(--shadow-md); font-family: 'Tajawal'; text-align: right; font-size: 1.1rem; }  
+
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding-bottom: 20px; }  
+        .note-card { background: white; border-radius: 20px; padding: 15px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); position: relative; border-bottom: 6px solid var(--primary-color); text-align: center; }  
+        .note-card.is-folder { background-color: #fffbeb; border-bottom-color: var(--folder-color); }
+        .card-title { font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .fab { position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 20px; background: linear-gradient(135deg, var(--secondary-color), #9333ea); color: white; font-size: 2.5rem; border: none; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4); cursor: pointer; z-index: 1000; }  
+
+        /* القوائم والنوافذ */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }  
+        .modal-content { background: white; width: 90%; max-width: 350px; padding: 25px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .full-modal { width: 100%; height: 100%; max-width: none; border-radius: 0; display: flex; flex-direction: column; }
+        
+        .modal-input-area { width: 100%; flex: 1; padding: 15px; border: 2px solid var(--primary-color); border-radius: 12px; font-family: 'Tajawal'; font-size: 1.2rem; text-align: right; resize: none; margin-bottom: 10px; }
+        .modal-input-single { width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: 'Tajawal'; text-align: right; margin-bottom: 15px; font-size: 1.1rem; }
+        
+        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Tajawal'; }
+        .confirm-primary { background: var(--primary-gradient); color: white; }
+        .cancel { background: #f1f5f9; color: #64748b; }
+        .actions { display: flex; gap: 10px; width: 100%; }
+
+        .sub-notes-list { flex: 1; overflow-y: auto; list-style: none; padding: 0; margin: 10px 0; }
+        .sub-note-item { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 12px; border-right: 4px solid var(--secondary-color); box-shadow: var(--shadow-sm); cursor: pointer; }
+
+        /* إعدادات */
+        .settings-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; cursor: pointer; font-weight: 600; }
+        .settings-item:last-child { border: none; }
+        
+    </style>  
+</head>  
+<body>  
+
+<!-- شاشة الدخول الإجبارية -->
+<div id="loginOverlay">
+    <div class="login-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" style="width: 60px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #202124;">مرحباً بك</h2>
+        <p style="color: #5f6368;">هذا التطبيق سحابي بالكامل.<br>يجب تسجيل الدخول للوصول لملاحظاتك.</p>
+        
+        <button class="google-btn-auth" onclick="startGoogleLogin()">
+            تسجيل الدخول باستخدام Google
+        </button>
+        <div id="loginStatus" style="margin-top: 15px; color: var(--primary-color); font-size: 0.9rem;"></div>
+    </div>
+</div>
+
+<!-- شريط الحالة السحابي -->
+<div id="cloudStatus" class="hidden">
+    <div class="spinner" id="cloudSpinner"></div>
+    <span id="cloudStatusText">تم التحديث</span>
+</div>
+
+<div class="header-content">  
+    <span class="settings-btn" onclick="document.getElementById('settingsModal').style.display='flex'">⋮</span>  
+    <h1>ملاحظاتي السحابية ☁️</h1>  
+</div>  
+
+<div id="navBar">
+    <button class="back-btn" onclick="goBackFolder()">➜ رجوع</button>
+    <span id="currentPathTitle" style="margin-right: 10px; font-weight: bold; color: #64748b;"></span>
+</div>
+
+<div class="search-container">  
+    <input type="text" id="searchInput" placeholder="🔍 ابحث في سحابتك..." oninput="renderMainGrid(this.value)">  
+</div>  
+
+<div id="notesGrid" class="grid-container"></div>  
+
+<button class="fab" onclick="showCreateMenu()">+</button>  
+
+<!-- القوائم المنبثقة -->
+<div id="createTypeMenu" class="modal" onclick="if(event.target==this) this.style.display='none'">
+    <div class="modal-content" style="padding:10px; width: auto; position: absolute; bottom: 100px; left: 30px;">
+        <div class="settings-item" onclick="createItemWrapper('folder')">📁 مجلد جديد</div>
+        <div class="settings-item" onclick="createItemWrapper('note')">📝 ملاحظة جديدة</div>
+    </div>
+</div>
+
+<!-- نافذة عرض الملاحظة -->
+<div id="detailsModal" class="modal">  
+    <div class="modal-content full-modal">  
+        <div class="actions" style="margin-bottom: 10px;">
+            <button class="back-btn" onclick="closeModalInternal()">➜ رجوع</button>
+            <span style="margin-right: auto; font-weight: bold; color: var(--primary-color);" id="modalTitle"></span>
+        </div>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <input type="text" id="newSubNoteInput" placeholder="أضف ملاحظة جديدة..." class="modal-input-single" style="margin:0; flex:1;">
+            <button onclick="addSubNote()" class="modal-btn confirm-primary" style="flex:0 0 50px;">+</button>
+        </div>
+        <ul id="subNotesList" class="sub-notes-list"></ul>  
+    </div>  
+</div>  
+
+<!-- نافذة الإدخال (تعديل/إضافة) -->
+<div id="inputModal" class="modal">  
+    <div class="modal-content full-modal">  
+        <p id="inputMessage" class="modal-message" style="margin: 10px 0; text-align: center; color: #64748b;"></p>  
+        <input type="text" id="modalInputSingle" class="modal-input-single" style="display:none;">
+        <textarea id="modalInputArea" class="modal-input-area" style="display:none;"></textarea>
+        <div class="actions">  
+            <button id="inputBtn" class="modal-btn confirm-primary">حفظ في السحابة ☁️</button>  
+            <button class="modal-btn cancel" onclick="hideInputModal(false)">إلغاء</button>  
+        </div>  
+    </div>  
+</div>  
+
+<!-- نافذة الخيارات (للملاحظات) -->
+<div id="contextMenu" class="modal" onclick="if(event.target==this) this.style.display='none'">
+    <div class="modal-content">
+        <div class="settings-item" onclick="handleMenuAction('edit')">✏️ تعديل الاسم</div>
+        <div class="settings-item" style="color:red" onclick="handleMenuAction('delete')">🗑️ حذف من السحابة</div>
+        <div class="settings-item" onclick="document.getElementById('contextMenu').style.display='none'">إلغاء</div>
+    </div>
+</div>
+
+<!-- نافذة خيارات الملاحظة الفرعية -->
+<div id="subNoteContextMenu" class="modal" onclick="if(event.target==this) this.style.display='none'">
+    <div class="modal-content">
+        <div class="settings-item" onclick="handleSubNoteAction('edit')">✏️ تعديل</div>
+        <div class="settings-item" onclick="handleSubNoteAction('copy')">📄 نسخ</div>
+        <div class="settings-item" style="color:red" onclick="handleSubNoteAction('delete')">🗑️ حذف</div>
+    </div>
+</div>
+
+<!-- الإعدادات -->
+<div id="settingsModal" class="modal" onclick="if(event.target==this) this.style.display='none'">
+    <div class="modal-content">
+        <h3>الإعدادات</h3>
+        <div class="settings-item" onclick="forceSyncFromCloud()">🔄 تحديث البيانات (جلب)</div>
+        <div class="settings-item" onclick="handleGoogleLogout()" style="color:red; border-top:1px solid #ddd;">🚪 تسجيل خروج</div>
+        <button class="modal-btn cancel" onclick="document.getElementById('settingsModal').style.display='none'" style="margin-top:10px; width:100%">إغلاق</button>
+    </div>
+</div>
+
+<script>  
+    // --- بيانات التطبيق ---
+    // لن نستخدم localStorage للملاحظات، المتغيرات هنا هي "ذاكرة مؤقتة" فقط
+    let allData = [];   
+    let currentFolderId = null; 
+    let activeCardId = null; 
+    let currentNoteId = null; 
+    let activeSubNoteIndex = null; 
+
+    // --- Google Config ---
+    const GOOGLE_CLIENT_ID = '979816526016-ukb9vqtb6u2hlutombpf8rumbjr3o2ua.apps.googleusercontent.com';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile';
+    const FILENAME = 'smart_notes_cloud_v1.json'; // الملف السحابي الموحد
+    let tokenClient;
+    let gAccessToken = localStorage.getItem('gAccessToken');
+
+    // --- البدء ---
+    function initGoogleLib() {
+        if(window.google) {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID, scope: SCOPES,
+                callback: (resp) => {
+                    if (resp.access_token) {
+                        gAccessToken = resp.access_token;
+                        localStorage.setItem('gAccessToken', gAccessToken);
+                        document.getElementById('loginOverlay').style.display = 'none';
+                        forceSyncFromCloud(); // جلب البيانات فوراً عند الدخول
+                    }
+                }
+            });
+
+            if(gAccessToken) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                forceSyncFromCloud(); // جلب البيانات إذا كان مسجل دخول سابقاً
+            } else {
+                // إذا لم يكن مسجل دخول، ابق في شاشة الدخول
+                // tokenClient.requestAccessToken({prompt: 'none'}); // محاولة صامتة اختيارية
+            }
+        }
+    }
+
+    function startGoogleLogin() {
+        document.getElementById('loginStatus').innerText = "جاري الاتصال بجوجل...";
+        if(tokenClient) tokenClient.requestAccessToken();
+    }
+
+    function handleGoogleLogout() {
+        if(confirm("تسجيل الخروج؟ ستفقد الوصول للملاحظات حتى تسجل الدخول مجدداً.")) {
+            localStorage.removeItem('gAccessToken');
+            location.reload(); // إعادة تحميل الصفحة لإظهار شاشة الدخول
+        }
+    }
+
+    // --- المحرك السحابي (Cloud Engine) ---
+    
+    function updateCloudStatus(status) {
+        const el = document.getElementById('cloudStatus');
+        const text = document.getElementById('cloudStatusText');
+        const spin = document.getElementById('cloudSpinner');
+        
+        el.classList.remove('hidden');
+        
+        if (status === 'saving') {
+            text.innerText = "جاري الحفظ في السحابة...";
+            spin.style.display = 'block';
+            el.style.background = "rgba(37, 99, 235, 0.9)"; // أزرق
+        } else if (status === 'loading') {
+            text.innerText = "جاري جلب البيانات...";
+            spin.style.display = 'block';
+            el.style.background = "rgba(37, 99, 235, 0.9)";
+        } else if (status === 'success') {
+            text.innerText = "تمت المزامنة ✅";
+            spin.style.display = 'none';
+            el.style.background = "rgba(5, 150, 105, 0.9)"; // أخضر
+            setTimeout(() => el.classList.add('hidden'), 2000);
+        } else if (status === 'error') {
+            text.innerText = "خطأ في الاتصال ❌";
+            spin.style.display = 'none';
+            el.style.background = "rgba(220, 38, 38, 0.9)"; // أحمر
+            setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+    }
+
+    // هذه الدالة هي "القلب": أي تعديل يحصل، نستدعيها فوراً لرفع البيانات
+    async function saveToCloud() {
+        if(!gAccessToken) return; // لا نفعل شيء إذا لم يكن مسجل دخول
+        updateCloudStatus('saving');
+
+        try {
+            // البحث عن الملف
+            const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`;
+            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, {
+                headers: { 'Authorization': `Bearer ${gAccessToken}` }
+            });
+
+            if(searchResp.status === 401) {
+                // التوكن انتهى
+                localStorage.removeItem('gAccessToken');
+                location.reload(); 
+                return;
+            }
+
+            const data = await searchResp.json();
+            let fileId = null;
+            if(data.files && data.files.length > 0) fileId = data.files[0].id;
+
+            // تجهيز البيانات
+            const payload = { smartNotesData: allData };
+            const fileBlob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+
+            if(fileId) {
+                // تحديث الملف الموجود
+                await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Content-Type': 'application/json' },
+                    body: fileBlob
+                });
+            } else {
+                // إنشاء ملف جديد
+                const metadata = { name: FILENAME, mimeType: 'application/json', parents: ['appDataFolder'] };
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', fileBlob);
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${gAccessToken}` },
+                    body: form
+                });
+            }
+            updateCloudStatus('success');
+        } catch(e) {
+            console.error(e);
+            updateCloudStatus('error');
+        }
+    }
+
+    // جلب البيانات عند الفتح
+    async function forceSyncFromCloud() {
+        if(!gAccessToken) return;
+        updateCloudStatus('loading');
+        document.getElementById('settingsModal').style.display='none';
+
+        try {
+            const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`;
+            const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, {
+                headers: { 'Authorization': `Bearer ${gAccessToken}` }
+            });
+            
+            const data = await searchResp.json();
+            if(data.files && data.files.length > 0) {
+                const fileId = data.files[0].id;
+                const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                    headers: { 'Authorization': `Bearer ${gAccessToken}` }
+                });
+                const cloudContent = await fileResp.json();
+                
+                if(cloudContent.smartNotesData) {
+                    allData = cloudContent.smartNotesData;
+                    renderMainGrid();
+                    // إذا كنا داخل ملاحظة، نحدث عرضها أيضاً
+                    if(document.getElementById('detailsModal').style.display === 'flex' && currentNoteId) {
+                        renderSubNotes();
+                    }
+                    updateCloudStatus('success');
+                } else {
+                    updateCloudStatus('success'); // ملف فارغ، لا بأس
+                }
+            } else {
+                // لا يوجد ملف بعد (مستخدم جديد)
+                updateCloudStatus('success');
+            }
+        } catch(e) {
+            console.error(e);
+            updateCloudStatus('error');
+        }
+    }
+
+    // --- المنطق الأساسي للتطبيق (معدل للحفظ السحابي) ---
+
+    function findNoteById(list, id) {
+        id = parseInt(id); 
+        for (let item of list) {
+            if (parseInt(item.id) === id) return item;
+            if (item.type === 'folder' && item.items) {
+                const found = findNoteById(item.items, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    function getCurrentList() {
+        if (currentFolderId === null) return allData;
+        const folder = findNoteById(allData, currentFolderId);
+        return folder ? folder.items : [];
+    }
+
+    function renderMainGrid(filter = '') {
+        const grid = document.getElementById('notesGrid'); grid.innerHTML = '';
+        const navBar = document.getElementById('navBar');
+        
+        if (currentFolderId === null) { navBar.style.display = 'none'; } 
+        else { navBar.style.display = 'flex'; const folder = findNoteById(allData, currentFolderId); document.getElementById('currentPathTitle').innerText = folder ? `📁 ${folder.title}` : ''; }
+
+        const list = getCurrentList(); 
+        const filteredList = list.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
+
+        filteredList.forEach(item => {
+            const card = document.createElement('div'); card.className = `note-card ${item.type === 'folder' ? 'is-folder' : ''}`;
+            let icon = item.type === 'folder' ? '📁' : '📄';
+            const count = item.items.length; const countLabel = item.type === 'folder' ? 'عنصر' : 'ملاحظة';
+            
+            card.innerHTML = ` <div class="card-icon-big">${icon}</div> <div class="card-title">${item.title}</div> <div class="card-count">${count} ${countLabel}</div> `;
+            card.onclick = () => handleCardClick(item); 
+            card.oncontextmenu = (e) => { e.preventDefault(); showContextMenu(item.id); };
+            
+            // Long press for mobile context menu
+            let pressTimer;
+            card.addEventListener('touchstart', () => { pressTimer = setTimeout(() => showContextMenu(item.id), 600); });
+            card.addEventListener('touchend', () => clearTimeout(pressTimer));
+            
+            grid.appendChild(card);
+        });
+    }
+
+    function handleCardClick(item) {
+        if (item.type === 'folder') {
+            currentFolderId = item.id; renderMainGrid();
+        } else {
+            openNoteDetails(item.id);
+        }
+    }
+
+    function goBackFolder() {
+        if(currentFolderId === null) return;
+        // البحث عن الأب بسيط هنا: نعود للجذر. (لتحسين التصفح العميق يحتاج منطق أعقد)
+        // في هذا الإصدار البسيط، الرجوع يعيد للرئيسية دائماً لضمان السهولة
+        currentFolderId = null; 
+        renderMainGrid();
+    }
+
+    // --- إنشاء العناصر ---
+    function showCreateMenu() { document.getElementById('createTypeMenu').style.display='flex'; }
+    
+    async function createItemWrapper(type) {
+        document.getElementById('createTypeMenu').style.display = 'none';
+        const title = await showInputModal(type === 'folder' ? 'اسم المجلد:' : 'عنوان الملاحظة:', '', 'single');
+        if (title) { 
+            const newItem = { id: Date.now(), type, title, items: [] }; 
+            getCurrentList().unshift(newItem); 
+            renderMainGrid(); 
+            
+            // 🔥 حفظ سحابي فوري 🔥
+            saveToCloud();
+            
+            if (type === 'note') openNoteDetails(newItem.id); 
+        }
+    }
+
+    // --- تفاصيل الملاحظة ---
+    function openNoteDetails(id) {
+        currentNoteId = id;
+        const note = findNoteById(allData, id); 
+        if (!note) return;
+        document.getElementById('modalTitle').innerText = note.title;
+        document.getElementById('detailsModal').style.display = 'flex';
+        renderSubNotes();
+    }
+
+    function closeModalInternal() {
+        document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    function renderSubNotes() {
+        const listEl = document.getElementById('subNotesList'); listEl.innerHTML = '';
+        const note = findNoteById(allData, currentNoteId); if (!note) return;
+        
+        note.items.forEach((content, index) => {
+            const li = document.createElement('li'); li.className = 'sub-note-item';
+            let displayContent = content.length > 100 ? content.substring(0, 100) + '...' : content;
+            li.innerHTML = `<div>${displayContent}</div>`;
+            li.onclick = () => editSubNote(index);
+            
+            // Long press for sub-note context
+            let pressTimer;
+            li.addEventListener('touchstart', () => { pressTimer = setTimeout(() => showSubContextMenu(index), 600); });
+            li.addEventListener('touchend', () => clearTimeout(pressTimer));
+            
+            listEl.appendChild(li);
+        });
+    }
+
+    function addSubNote() {
+        const input = document.getElementById('newSubNoteInput');
+        if (input.value.trim() === '') return;
+        const note = findNoteById(allData, currentNoteId);
+        note.items.unshift(input.value.trim());
+        input.value = '';
+        
+        renderSubNotes();
+        // 🔥 حفظ سحابي فوري 🔥
+        saveToCloud();
+    }
+
+    async function editSubNote(index) {
+        const note = findNoteById(allData, currentNoteId);
+        const newContent = await showInputModal('', note.items[index], 'area');
+        if (newContent !== null) { 
+            note.items[index] = newContent; 
+            renderSubNotes(); 
+            // 🔥 حفظ سحابي فوري 🔥
+            saveToCloud();
+        }
+    }
+
+    // --- القوائم الفرعية (حذف/تعديل) ---
+    function showContextMenu(id) {
+        activeCardId = id;
+        document.getElementById('contextMenu').style.display = 'flex';
+    }
+    
+    function showSubContextMenu(index) {
+        activeSubNoteIndex = index;
+        document.getElementById('subNoteContextMenu').style.display = 'flex';
+    }
+
+    async function handleMenuAction(action) {
+        document.getElementById('contextMenu').style.display = 'none';
+        const item = findNoteById(allData, activeCardId);
+        
+        if (action === 'delete') {
+            if (confirm(`حذف "${item.title}" نهائياً من السحابة؟`)) {
+                if (currentFolderId === null) allData = allData.filter(n => n.id !== activeCardId);
+                else findNoteById(allData, currentFolderId).items = findNoteById(allData, currentFolderId).items.filter(n => n.id !== activeCardId);
+                renderMainGrid();
+                saveToCloud(); // 🔥
+            }
+        } else if (action === 'edit') {
+            const newTitle = await showInputModal('تعديل الاسم:', item.title, 'single');
+            if (newTitle) { 
+                item.title = newTitle; 
+                renderMainGrid(); 
+                saveToCloud(); // 🔥
+            }
+        }
+    }
+
+    async function handleSubNoteAction(action) {
+        document.getElementById('subNoteContextMenu').style.display = 'none';
+        const note = findNoteById(allData, currentNoteId);
+        
+        if (action === 'delete') {
+            note.items.splice(activeSubNoteIndex, 1);
+            renderSubNotes();
+            saveToCloud(); // 🔥
+        } else if (action === 'copy') {
+            navigator.clipboard.writeText(note.items[activeSubNoteIndex]);
+            alert("تم النسخ");
+        } else if (action === 'edit') {
+            editSubNote(activeSubNoteIndex);
+        }
+    }
+
+    // --- Modal Logic ---
+    function showInputModal(msg, val, type) {
+        document.getElementById('inputMessage').innerText = msg;
+        const modal = document.getElementById('inputModal');
+        const single = document.getElementById('modalInputSingle');
+        const area = document.getElementById('modalInputArea');
+        
+        single.style.display = type === 'single' ? 'block' : 'none';
+        area.style.display = type === 'area' ? 'block' : 'none';
+        
+        const input = type === 'single' ? single : area;
+        input.value = val;
+        
+        modal.style.display = 'flex';
+        input.focus();
+
+        return new Promise(resolve => {
+            document.getElementById('inputBtn').onclick = () => {
+                modal.style.display = 'none';
+                resolve(input.value);
+            };
+            window.hideInputModal = () => {
+                modal.style.display = 'none';
+                resolve(null);
+            };
+        });
+    }
+
+</script>  
+</body>  
+</html>

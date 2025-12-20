@@ -3,7 +3,7 @@
 <head>  
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
-    <title>ملاحظاتي الذكية - Cloud Only</title>  
+    <title>ملاحظاتي الذكية - Cloud Pro</title>  
     
     <!-- مكتبة جوجل -->
     <script src="https://accounts.google.com/gsi/client" onload="initGoogleLib()" async defer></script>
@@ -137,6 +137,8 @@
 
         /* --- Search --- */
         .search-container { margin-bottom: 25px; position: relative; }  
+        
+        /* التعديل: إضافة autocomplete="off" لإصلاح مشكلة الروابط */
         #searchInput {  
             width: 100%; padding: 16px 20px; padding-left: 45px; 
             border: 2px solid transparent; background-color: white; border-radius: var(--radius);  
@@ -224,7 +226,7 @@
         }  
         .context-item:hover { background-color: var(--light-bg); color: var(--primary-color); }  
         .context-item.delete { color: var(--danger-color); border-top: 1px solid #f1f5f9; margin-top: 5px; }  
-        .context-item.add-to-home { border-top: 1px solid #f1f5f9; margin-top: 5px; color: var(--success-color); }
+        .context-item.copy-option { border-top: 1px solid #f1f5f9; margin-top: 5px; color: var(--success-color); }
 
         /* --- Modals --- */
         .modal {  
@@ -390,14 +392,16 @@
     <span id="currentPathTitle" class="current-path" style="margin-right: auto;"></span>
 </div>
 
+<!-- تم إضافة autocomplete="off" لإصلاح مشكلة الروابط -->
 <div class="search-container">  
     <span id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()">×</span>
-    <input type="text" id="searchInput" placeholder="🔍  ابحث في العناوين..." oninput="searchNotes()">  
+    <input type="text" id="searchInput" placeholder="🔍  ابحث في العناوين..." oninput="searchNotes()" autocomplete="off">  
 </div>  
 
 <div id="contextMenu">  
     <button class="context-item" id="lockUnlockBtn" onclick="handleMenuAction('toggleLock')">🔒 قفل/فتح</button>  
     <button class="context-item" onclick="handleMenuAction('edit')">✏️ تعديل الاسم</button>  
+    <button class="context-item" onclick="handleMenuAction('copyText')">📄 نسخ (المحتوى)</button>
     <button class="context-item delete" onclick="handleMenuAction('delete')">🗑️ حذف</button>
 </div>  
 
@@ -428,7 +432,7 @@
         <div style="text-align: right; margin-bottom: 10px;">  
             <span class="modal-title" id="modalTitle" style="display:block; font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">عنوان الملاحظة</span>  
         </div>  
-        <input type="text" id="subSearchInput" placeholder="بحث داخل القائمة..." oninput="renderSubNotes()" style="margin-bottom:10px; padding:10px;">
+        <input type="text" id="subSearchInput" placeholder="بحث داخل القائمة..." oninput="renderSubNotes()" style="margin-bottom:10px; padding:10px;" autocomplete="off">
         <ul id="subNotesList" class="sub-notes-list"></ul>  
         <div class="input-area">  
             <textarea id="newSubNoteInput" placeholder="أضف نصاً..."></textarea>   
@@ -451,7 +455,7 @@
             <input type="text" id="inTextSearchInput" class="text-search-input" placeholder="بحث في النص..." onkeyup="if(event.key==='Enter') findInText('next')">
         </div>
         <p id="inputMessage" class="modal-message"></p>  
-        <input type="text" id="modalInputSingle" class="modal-input-single" style="display:none;">
+        <input type="text" id="modalInputSingle" class="modal-input-single" style="display:none;" autocomplete="off">
         <textarea id="modalInputArea" class="modal-input-area" style="display:none;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
         <div class="modal-actions">  
             <button id="inputCopyBtn" class="modal-btn confirm-copy" onclick="copyModalContent()">نسخ</button>
@@ -482,6 +486,16 @@
             </div>
             <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
         </div>
+
+        <!-- أزرار التصدير والاستيراد الجديدة -->
+        <div class="settings-item" onclick="exportDataAuto()"> <span class="settings-title">تصدير ملف (JSON)</span> <span class="settings-icon">📥</span> </div>  
+        <div class="settings-item" onclick="document.getElementById('importFile').click()"> <span class="settings-title">استيراد ملف (JSON)</span> <span class="settings-icon">📂</span> </div>  
+        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDataWrapper(event)">  
+        
+        <div class="settings-item" onclick="exportDataManual()"> <span class="settings-title">نسخ يدوي (Text)</span> <span class="settings-icon">📝</span> </div>
+        <div class="settings-item" onclick="importDataPaste()"> <span class="settings-title">استيراد يدوي (Paste)</span> <span class="settings-icon">📋</span> </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">  
 
         <div id="setPassBtn" class="settings-item" onclick="setAppPassword()">  
             <span class="settings-title">تعيين كلمة مرور للتطبيق</span> <span class="settings-icon">🔒</span>  
@@ -571,8 +585,8 @@
     const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile';
     const FILENAME = 'smart_notes_cloud_v1.json'; 
     let tokenClient;
-    let gAccessToken = localStorage.getItem('gAccessToken'); // Token persists, Data does not.
-    let saveTimeout = null; // For debouncing auto-save
+    let gAccessToken = localStorage.getItem('gAccessToken'); 
+    let saveTimeout = null; 
 
     // --- History & Back Button Control ---
     window.addEventListener('popstate', function(event) {
@@ -591,29 +605,33 @@
     
     // --- NO LOCAL STORAGE FOR NOTES ---
     function saveData() { 
-        // Trigger Auto-Save to Cloud
         if(saveTimeout) clearTimeout(saveTimeout);
         document.getElementById('syncText').innerText = "جاري الحفظ...";
         setSyncLoader(true);
-        // Debounce: Wait 1 second after last change before uploading
         saveTimeout = setTimeout(() => {
             forceUploadToDrive(true); // True = Silent Mode
         }, 1000);
     } 
     
     function loadData() { 
-        // Do NOT load from localStorage. 
-        // Data is empty until fetched from Cloud.
         allData = []; 
         if(gAccessToken) {
-            forceSyncFromCloud(true); // Try to fetch immediately
+            forceSyncFromCloud(true); 
         } else {
             document.getElementById('loginOverlay').style.display = 'flex';
         }
     }
 
     let activeCardId = null; let currentNoteId = null; let activeSubNoteIndex = null; let isMainSelectionMode = false; let selectedMainIds = new Set(); let isSelectionMode = false; let selectedSubIndices = new Set();
-    document.addEventListener('DOMContentLoaded', () => { loadData(); renderMainGrid(); document.getElementById('searchInput').addEventListener('focus', function() { pushState(); }); document.getElementById('modalInputArea').addEventListener('input', function(e) { saveHistory(this.value); }); });
+    document.addEventListener('DOMContentLoaded', () => { 
+        // تفريغ حقل البحث عند التحميل لإصلاح مشكلة النص التلقائي
+        document.getElementById('searchInput').value = '';
+        
+        loadData(); 
+        renderMainGrid(); 
+        document.getElementById('searchInput').addEventListener('focus', function() { pushState(); }); 
+        document.getElementById('modalInputArea').addEventListener('input', function(e) { saveHistory(this.value); }); 
+    });
 
     function initHistory(val) { historyStack = [val]; historyIndex = 0; updateUndoRedoButtons(); }
     function saveHistory(val) { if (historyIndex < historyStack.length - 1) { historyStack = historyStack.slice(0, historyIndex + 1); } historyStack.push(val); historyIndex++; updateUndoRedoButtons(); }
@@ -641,9 +659,31 @@
             const count = item.items.length; const countLabel = item.type === 'folder' ? 'عنصر' : 'ملاحظة';
             if (selectedMainIds.has(item.id)) card.classList.add('selected');
             card.innerHTML = ` <span class="card-selection-icon">${selectedMainIds.has(item.id) ? '✓' : ''}</span> <div class="card-icon-big">${icon}</div> <div class="card-title">${item.title}</div> <div class="card-count">${count} ${countLabel}</div> ${!isMainSelectionMode ? '<span class="sort-handle">⇅</span>' : ''} `;
-            card.onclick = (e) => handleCardClick(e, item); card.oncontextmenu = (e) => { e.preventDefault(); showContextMenu(item.id); };
-            let pressTimer; card.addEventListener('touchstart', (e) => { if (e.target.classList.contains('sort-handle')) return; pressTimer = setTimeout(() => { if (!isMainSelectionMode) showContextMenu(item.id); }, 600); });
-            card.addEventListener('touchend', () => clearTimeout(pressTimer)); card.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            
+            // Logic for Click vs Long Press
+            let isLongPress = false;
+            card.onclick = (e) => { 
+                if (isLongPress) return; // Ignore click if long press triggered
+                handleCardClick(e, item); 
+            }; 
+            
+            // Context Menu Logic (Right Click + Long Press)
+            card.oncontextmenu = (e) => { e.preventDefault(); isLongPress = true; showContextMenu(item.id); };
+            let pressTimer; 
+            card.addEventListener('touchstart', (e) => { 
+                if (e.target.classList.contains('sort-handle')) return; 
+                isLongPress = false; // Reset
+                pressTimer = setTimeout(() => { 
+                    if (!isMainSelectionMode) {
+                        isLongPress = true;
+                        if(navigator.vibrate) navigator.vibrate(50);
+                        showContextMenu(item.id); 
+                    }
+                }, 600); // 600ms for long press
+            });
+            card.addEventListener('touchend', () => clearTimeout(pressTimer)); 
+            card.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            
             addDragEvents(card, item); grid.appendChild(card);
         });
         updateMainToolbar(); const clearBtn = document.getElementById('clearSearchBtn'); if (filter.length > 0) { clearBtn.style.display = 'flex'; } else { clearBtn.style.display = 'none'; }
@@ -712,6 +752,16 @@
             if (await showConfirmModal(`هل أنت متأكد من حذف "${item.title}"؟`)) { if (currentFolderId === null) allData = allData.filter(n => n.id !== activeCardId); else findNoteById(allData, currentFolderId).items = findNoteById(allData, currentFolderId).items.filter(n => n.id !== activeCardId); saveData(); renderMainGrid(); }
         } else if (action === 'edit') { if (item.isLocked && !(await checkPassword(item))) return; const newTitle = await showInputModal(item.type === 'folder' ? 'تعديل اسم المجلد:' : 'تعديل عنوان الملاحظة:', item.title, 'single'); if (newTitle) { item.title = newTitle; saveData(); renderMainGrid(); } } 
         else if (action === 'toggleLock') { if (item.isLocked) { if (await checkPassword(item)) { item.isLocked = false; item.passwordHash = null; showNotification('تم فتح القفل', 'success'); } } else { const pass = await showPasswordModal(); if (pass) { item.isLocked = true; item.passwordHash = btoa(pass); showNotification('تم القفل', 'success'); } } saveData(); renderMainGrid(); } 
+        else if (action === 'copyText') {
+            if (item.type === 'folder') {
+                showNotification('لا يمكن نسخ مجلد كامل كنص', 'info');
+            } else {
+                if (item.isLocked && !(await checkPassword(item))) return;
+                const textContent = item.items.join("\n\n---\n\n");
+                navigator.clipboard.writeText(textContent);
+                showNotification('تم نسخ محتوى الملاحظة', 'success');
+            }
+        }
     }
 
     function showCreateMenu() { const menu = document.getElementById('createTypeMenu'); menu.style.display = 'flex'; setTimeout(() => { const closeMenu = (e) => { if(!e.target.closest('#createTypeMenu') && !e.target.closest('.fab')) { menu.style.display = 'none'; document.removeEventListener('click', closeMenu); } }; document.addEventListener('click', closeMenu); }, 100); }
@@ -722,7 +772,7 @@
     function selectAllSubNotes() { const note = findNoteById(allData, currentNoteId); note.items.forEach((_, i) => selectedSubIndices.add(i)); renderSubNotes(); }
     async function deleteSelectedSubNotesWrapper() { if (selectedSubIndices.size === 0) return; if (await showConfirmModal('حذف العناصر المحددة؟')) { const note = findNoteById(allData, currentNoteId); const sorted = Array.from(selectedSubIndices).sort((a,b) => b-a); sorted.forEach(i => note.items.splice(i, 1)); saveData(); toggleSelectionMode(false); } }
 
-    function showContextMenu(id) { activeCardId = id; const menu = document.getElementById('contextMenu'); document.querySelector('.context-item[onclick*="addToHome"]').style.display = currentFolderId === null ? 'none' : 'flex'; menu.style.display = 'flex'; setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); }
+    function showContextMenu(id) { activeCardId = id; const menu = document.getElementById('contextMenu'); menu.style.display = 'flex'; setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); }
     function showSubContextMenu(index) { activeSubNoteIndex = index; const menu = document.getElementById('subNoteContextMenu'); menu.style.display = 'flex'; setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); }
     function handleSubNoteAction(action) { const note = findNoteById(allData, currentNoteId); if (action === 'delete') note.items.splice(activeSubNoteIndex, 1); else if (action === 'copy') navigator.clipboard.writeText(note.items[activeSubNoteIndex]); else if (action === 'edit') editSubNote(activeSubNoteIndex); saveData(); renderSubNotes(); document.getElementById('subNoteContextMenu').style.display = 'none'; }
 
@@ -742,6 +792,42 @@
     function updateSettingsUI() { const hasPass = localStorage.getItem(APP_PASS_KEY) !== null; document.getElementById('setPassBtn').style.display = hasPass ? 'none' : 'flex'; document.getElementById('removePassBtn').style.display = hasPass ? 'flex' : 'none'; }
     async function setAppPassword() { const p = await showPasswordModal(); if(p) { localStorage.setItem(APP_PASS_KEY, btoa(p)); showNotification('تم القفل بنجاح', 'success'); hideSettingsModal(); } }
     async function removeAppPassword() { if(await showConfirmModal('حذف كلمة مرور التطبيق؟')) { localStorage.removeItem(APP_PASS_KEY); hideSettingsModal(); showNotification('تم حذف كلمة المرور', 'info'); } }
+    
+    // --- IMPORT / EXPORT FUNCTIONS ---
+    function exportDataAuto() { 
+        const blob = new Blob([JSON.stringify(allData)], {type: "application/json"}); 
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); 
+        a.download = "smart_notes_backup.json"; a.click(); 
+    }
+    function importDataWrapper(e) { 
+        const reader = new FileReader(); 
+        reader.onload = (f) => { 
+            try { 
+                allData = JSON.parse(f.target.result); 
+                saveData(); // Sync immediately
+                renderMainGrid(); 
+                hideSettingsModal(); 
+                showNotification('تم استعادة البيانات بنجاح', 'success'); 
+            } catch(e){ showNotification('ملف غير صالح', 'error'); } 
+        }; 
+        reader.readAsText(e.target.files[0]); 
+    }
+    function exportDataManual() { 
+        showInputModal('نسخة احتياطية (نصية) - انسخ الكود:', JSON.stringify(allData), 'area', true); 
+    }
+    async function importDataPaste() { 
+        const t = await showInputModal('الصق نص النسخة الاحتياطية (JSON) هنا:', '', 'area', false, true); 
+        if(t) { 
+            try { 
+                allData = JSON.parse(t); 
+                saveData(); // Sync immediately
+                renderMainGrid(); 
+                hideSettingsModal(); 
+                showNotification('تم استعادة البيانات بنجاح', 'success'); 
+            } catch(e){ showNotification('نص غير صالح', 'error'); } 
+        } 
+    }
+
     function showNotification(m, t) { const icon = document.getElementById('notifIcon'); icon.innerText = t === 'success' ? '✅' : (t === 'error' ? '❌' : 'ℹ️'); document.getElementById('notificationMessage').innerText = m; document.getElementById('notificationModal').style.display = 'flex'; }
     function closeNotification() { document.getElementById('notificationModal').style.display = 'none'; }
 
